@@ -1297,6 +1297,12 @@ window.switchProjectSection = function(section) {
   currentFilterPlace = 'all';
   currentFilterArea = 'all';
 
+  if (section === 'backlog') {
+    document.body.classList.add('show-backlog-view');
+  } else {
+    document.body.classList.remove('show-backlog-view');
+  }
+
   const tabActive = document.getElementById('tab-active-projects');
   const tabBacklog = document.getElementById('tab-backlog-projects');
 
@@ -1308,7 +1314,25 @@ window.switchProjectSection = function(section) {
   }
 
   updateUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+window.openCatalogModal = function() {
+  renderCatalog();
+  catalogModal?.classList.add('is-open');
+};
+
+window.openReportModal = function() {
+  populateReportPlaceFilter();
+  renderReportContent();
+  reportModal?.classList.add('is-open');
+};
+
+window.openBackupModal = function() {
+  backupModal?.classList.add('is-open');
+};
+
+window.openRepairModal = openRepairModal;
 
 window.promoteToActive = function(repairId) {
   const repair = appData.repairs.find(r => r.id === repairId);
@@ -1517,7 +1541,261 @@ function renderRepairsGrid() {
 
   // GRID VIEW MODE (Rich Parish Project Cards)
   repairsContainer.className = 'repairs-grid';
-  let html = currentProjectSection === 'backlog' ? backlogBannerHtml : '';
+
+  if (currentProjectSection === 'active') {
+    let html = `
+      <div class="active-campaign-banner">
+        <div class="active-campaign-badge">
+          <span class="pulse-beacon"></span>
+          <span>PROYECTO PRIORITARIO PARROQUIAL EN CURSO</span>
+        </div>
+        <h2 class="active-campaign-title">Renovación de Pilas Recargables para Micrófonos</h2>
+        <p class="active-campaign-subtitle">
+          Todo el apoyo comunitario está focalizado en asegurar el audio litúrgico de los 6 micrófonos inalámbricos del Templo Mayor y la Capilla de Adoración Continua.
+        </p>
+      </div>
+    `;
+
+    filtered.forEach(repair => {
+      const items = repair.items || [];
+      let repairMaterialsCost = 0;
+      let repairBoughtCount = 0;
+      let totalQty = 0;
+
+      items.forEach(itm => {
+        const price = Number(itm.price) || 0;
+        const qty = Number(itm.qty) || 1;
+        repairMaterialsCost += price * qty;
+        totalQty += qty;
+        if (itm.bought) repairBoughtCount += qty;
+      });
+
+      const laborCost = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
+      const totalRepairCost = repairMaterialsCost + laborCost;
+      const raised = Number(repair.raisedAmount) || 0;
+      const fundingPct = totalRepairCost > 0 ? Math.min(100, Math.round((raised / totalRepairCost) * 100)) : 0;
+      const remainingNeeded = Math.max(0, totalRepairCost - raised);
+
+      html += `
+        <article class="featured-active-card" data-id="${repair.id}">
+          <div class="card-top">
+            <div class="hierarchy-tags">
+              <span class="tag tag-place">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                ${escapeHtml(repair.place || 'Templo Mayor')}
+              </span>
+              <span class="tag tag-area">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                ${escapeHtml(repair.area || 'Sonido')}
+              </span>
+              <span class="tag tag-specialty">
+                🎙️ Audio y Megafonía
+              </span>
+              <span class="tag tag-status-compras">
+                🟢 En Recaudación y Compras
+              </span>
+              <span class="tag tag-priority-alta">
+                Prioridad Alta
+              </span>
+            </div>
+          </div>
+
+          <div class="card-main-body">
+            <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
+          </div>
+
+          <!-- Prominent Goal Amount Box (Meta a Recaudar Claramente Visible) -->
+          <div class="card-meta-highlight-box">
+            <div class="meta-highlight-top">
+              <span class="meta-highlight-title-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                Monto Meta a Recaudar
+              </span>
+              <span class="meta-highlight-status-badge">Campaña Activa</span>
+            </div>
+            <div class="meta-highlight-amount">
+              ${formatCurrency(totalRepairCost)}
+              <span class="meta-highlight-amount-suffix">Meta Total Requerida</span>
+            </div>
+            <div class="meta-highlight-breakdown">
+              <div class="meta-breakdown-cell raised">
+                <span class="meta-breakdown-lbl">Recaudado</span>
+                <span class="meta-breakdown-val">${formatCurrency(raised)}</span>
+              </div>
+              <div class="meta-breakdown-cell remaining">
+                <span class="meta-breakdown-lbl">Por Recaudar</span>
+                <span class="meta-breakdown-val">${formatCurrency(remainingNeeded)}</span>
+              </div>
+              <div class="meta-breakdown-cell pct">
+                <span class="meta-breakdown-lbl">Avance Meta</span>
+                <span class="meta-breakdown-val">${fundingPct}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Funding Progress Bar -->
+          <div class="card-funding-box">
+            <div class="funding-header">
+              <span class="funding-title">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                Avance de Recaudación Solidaria
+              </span>
+              <span class="funding-pct-badge ${fundingPct >= 100 ? 'funded' : 'in-progress'}">
+                ${fundingPct}% Financiado
+              </span>
+            </div>
+
+            <div class="funding-bar-track" title="${fundingPct}% recaudado">
+              <div class="funding-bar-fill ${fundingPct >= 100 ? 'is-100' : ''}" style="width: ${fundingPct}%;"></div>
+            </div>
+
+            <div class="funding-footer-stats">
+              <span>Aportado: <strong>${formatCurrency(raised)}</strong></span>
+              <span>Meta: <strong>${formatCurrency(totalRepairCost)}</strong></span>
+              <span class="remaining-text">Faltan ${formatCurrency(remainingNeeded)}</span>
+            </div>
+          </div>
+
+          <!-- Direct Call to Action Buttons -->
+          <div class="active-actions-row">
+            <button type="button" class="btn-cta-donate" onclick="openDonationModal('${repair.id}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              Hacer Donación por Transferencia
+            </button>
+            <a href="https://wa.me/56933484878?text=${encodeURIComponent('Hola Parroquia San Patricio, deseo realizar una donación para la compra de pilas recargables de los micrófonos.')}" target="_blank" class="btn-cta-whatsapp">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              Avisar Donación por WhatsApp
+            </a>
+          </div>
+
+          <!-- Embedded Instant Bank Transfer Card -->
+          <div class="instant-bank-card">
+            <div class="instant-bank-header">
+              <span>🏦 Datos Oficiales para Transferencia Bancaria</span>
+              <span style="font-size:0.75rem; font-weight:normal; color:var(--text-subtle);">Banco Santander Chile</span>
+            </div>
+
+            <div class="instant-bank-grid">
+              <div class="instant-bank-row">
+                <div>
+                  <span class="instant-bank-lbl">Cuenta Corriente</span>
+                  <span class="instant-bank-val">73235740</span>
+                </div>
+                <button type="button" class="btn-instant-copy" onclick="copyDonationField('73235740', this)">
+                  📋 Copiar
+                </button>
+              </div>
+
+              <div class="instant-bank-row">
+                <div>
+                  <span class="instant-bank-lbl">RUT Parroquia</span>
+                  <span class="instant-bank-val">82.566.800-4</span>
+                </div>
+                <button type="button" class="btn-instant-copy" onclick="copyDonationField('825668004', this)">
+                  📋 Copiar
+                </button>
+              </div>
+
+              <div class="instant-bank-row">
+                <div>
+                  <span class="instant-bank-lbl">Titular</span>
+                  <span class="instant-bank-val">Parroquia San Patricio</span>
+                </div>
+                <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia San Patricio', this)">
+                  📋 Copiar
+                </button>
+              </div>
+
+              <div class="instant-bank-row">
+                <div>
+                  <span class="instant-bank-lbl">Correo Comprobante</span>
+                  <span class="instant-bank-val" style="font-size:0.75rem;">secreparroquiasanpatricio@gmail.com</span>
+                </div>
+                <button type="button" class="btn-instant-copy" onclick="copyDonationField('secreparroquiasanpatricio@gmail.com', this)">
+                  📋 Copiar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sodimac Product Reference Bar -->
+          <div class="product-sodimac-bar">
+            <div class="product-sodimac-info">
+              <div class="product-sodimac-icon">🔋</div>
+              <div class="product-sodimac-text">
+                <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V</span>
+                <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • 12 packs requeridos ($75.480)</span>
+              </div>
+            </div>
+            <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
+              Ver en Sodimac.cl ↗
+            </a>
+          </div>
+
+          <!-- Technical Rationale & Calculation Box -->
+          <div class="tech-calc-box">
+            <div class="tech-calc-title">
+              <span>💡 Justificación Técnica y Cálculo de la Meta:</span>
+            </div>
+            <ul class="tech-calc-list">
+              <li>
+                <span>🎙️</span>
+                <span><strong>6 micrófonos inalámbricos en total:</strong> 4 en el Templo Mayor y 2 en la Capilla de Adoración Continua.</span>
+              </li>
+              <li>
+                <span>🔋</span>
+                <span><strong>2 pilas AA por micrófono:</strong> 6 micrófonos × 2 pilas = <strong>12 pilas AA</strong> en uso simultáneo durante las misas y celebraciones.</span>
+              </li>
+              <li>
+                <span>🔄</span>
+                <span><strong>Rotación continua (doble juego):</strong> Se requiere el doble (12 × 2 = <strong>24 pilas</strong>) para que mientras un juego está operativo, el otro se encuentre cargando en sacristía.</span>
+              </li>
+              <li>
+                <span>📦</span>
+                <span><strong>12 packs de 2 pilas Energizer recargables</strong> a $6.290 cada uno en Sodimac = <strong>$75.480 monto meta total</strong>.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Quick Actions & Administration -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="promptQuickDonation('${repair.id}')" style="font-size: 0.78rem;">
+              + Registrar Aporte Recibido
+            </button>
+            <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size: 0.78rem;">
+              ⚙️ Ver Ficha Técnica Completa
+            </button>
+          </div>
+        </article>
+      `;
+    });
+
+    html += `
+      <!-- Backlog Invitation Bar -->
+      <div class="backlog-peek-box">
+        <div class="backlog-peek-info">
+          <span class="backlog-peek-title">📋 ¿Deseas conocer otras iniciativas de la parroquia?</span>
+          <span class="backlog-peek-desc">Existen otros 8 proyectos futuros en estudio técnico (iluminación exterior, sensores, climatización, etc.)</span>
+        </div>
+        <button type="button" class="btn-peek-backlog" onclick="switchProjectSection('backlog')">
+          Ver Backlog Parroquial (8 proyectos) →
+        </button>
+      </div>
+    `;
+
+    repairsContainer.innerHTML = html;
+    return;
+  }
+
+  // BACKLOG VIEW MODE
+  let html = `
+    <div class="backlog-return-bar">
+      <button type="button" class="btn-return-active" onclick="switchProjectSection('active')">
+        ← Volver al Proyecto Activo (Pilas Micrófonos)
+      </button>
+    </div>
+    ${backlogBannerHtml}
+  `;
 
   filtered.forEach(repair => {
     const items = repair.items || [];
@@ -1581,20 +1859,18 @@ function renderRepairsGrid() {
           ${repair.description ? `<p class="repair-description">${escapeHtml(repair.description)}</p>` : ''}
         </div>
 
-        <!-- Prominent Goal Amount Box (Meta a Recaudar Claramente Visible) -->
+        <!-- Prominent Goal Amount Box -->
         <div class="card-meta-highlight-box">
           <div class="meta-highlight-top">
             <span class="meta-highlight-title-label">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-              ${repair.status === 'planificacion' ? 'Monto Estimado Proyecto' : 'Monto Meta a Recaudar'}
+              Monto Estimado Proyecto
             </span>
-            <span class="meta-highlight-status-badge">
-              ${repair.status === 'planificacion' ? 'En Backlog' : 'Campaña Activa'}
-            </span>
+            <span class="meta-highlight-status-badge">En Backlog</span>
           </div>
           <div class="meta-highlight-amount">
             ${formatCurrency(totalRepairCost)}
-            <span class="meta-highlight-amount-suffix">Meta Total</span>
+            <span class="meta-highlight-amount-suffix">Presupuesto</span>
           </div>
           <div class="meta-highlight-breakdown">
             <div class="meta-breakdown-cell raised">
@@ -1602,36 +1878,13 @@ function renderRepairsGrid() {
               <span class="meta-breakdown-val">${formatCurrency(raised)}</span>
             </div>
             <div class="meta-breakdown-cell remaining">
-              <span class="meta-breakdown-lbl">Por Recaudar</span>
+              <span class="meta-breakdown-lbl">Por Financiar</span>
               <span class="meta-breakdown-val">${formatCurrency(remainingNeeded)}</span>
             </div>
             <div class="meta-breakdown-cell pct">
-              <span class="meta-breakdown-lbl">Avance Meta</span>
+              <span class="meta-breakdown-lbl">Avance</span>
               <span class="meta-breakdown-val">${fundingPct}%</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Parish Funding & Donation Progress Box -->
-        <div class="card-funding-box">
-          <div class="funding-header">
-            <span class="funding-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              ${repair.status === 'planificacion' ? 'Presupuesto Planificado' : 'Meta & Recaudación Solidaria'}
-            </span>
-            <span class="funding-pct-badge ${fundingPct >= 100 ? 'funded' : 'in-progress'}">
-              ${repair.status === 'planificacion' ? 'En Backlog' : `${fundingPct}% Financiado`}
-            </span>
-          </div>
-
-          <div class="funding-bar-track" title="${fundingPct}% recaudado">
-            <div class="funding-bar-fill ${fundingPct >= 100 ? 'is-100' : ''}" style="width: ${fundingPct}%;"></div>
-          </div>
-
-          <div class="funding-footer-stats">
-            <span>Aportado: <strong>${formatCurrency(raised)}</strong></span>
-            <span>Meta: <strong>${formatCurrency(totalRepairCost)}</strong></span>
-            ${fundingPct >= 100 ? '<span class="completed-text">¡100% Financiado!</span>' : `<span class="remaining-text">${repair.status === 'planificacion' ? 'Presupuesto en espera' : `Faltan ${formatCurrency(remainingNeeded)}`}</span>`}
           </div>
         </div>
 
@@ -1639,48 +1892,25 @@ function renderRepairsGrid() {
         <div class="card-stats-summary">
           <div class="card-stat-pill ${isCompleted ? 'pill-completed' : ''}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span>${items.length} ${items.length === 1 ? 'material cotizado' : 'materiales cotizados'} (${repairBoughtCount}/${totalQty} adquiridos)</span>
+            <span>${items.length} ${items.length === 1 ? 'material cotizado' : 'materiales cotizados'}</span>
           </div>
 
           ${repair.hasLabor && laborCost > 0 ? `
             <div class="card-stat-pill pill-labor" title="Incluye mano de obra técnica calificada">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-              <span>Instalación SEC/Técnica: ${formatCurrency(laborCost)}</span>
+              <span>Instalación: ${formatCurrency(laborCost)}</span>
             </div>
           ` : ''}
         </div>
 
-        <!-- Action Row: Donate to this project, log donation, or activate from backlog -->
+        <!-- Action Row -->
         <div class="card-donation-row" onclick="event.stopPropagation();">
-          ${repair.status === 'planificacion' ? `
-            <button type="button" class="btn-activate-project" onclick="promoteToActive('${repair.id}')" title="Activar esta iniciativa para comenzar su recaudación y compras">
-              🚀 Activar como Proyecto Activo
-            </button>
-            <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size:0.75rem; padding: 0.35rem 0.65rem;" title="Ver y editar ficha técnica">
-              Ver Ficha
-            </button>
-          ` : `
-            <button type="button" class="btn-donate-card" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto parroquial con transferencia a Santander">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              Donar a este Proyecto
-            </button>
-            <button type="button" class="btn-log-donation" onclick="promptQuickDonation('${repair.id}')" title="Registrar aporte de bienhechor en la plataforma">
-              + Aporte
-            </button>
-          `}
-        </div>
-
-        <!-- Clean Card Footer -->
-        <div class="card-footer">
-          <div class="card-total-badge">
-            <span class="total-label">Presupuesto Total</span>
-            <span class="total-amount">${formatCurrency(totalRepairCost)}</span>
-          </div>
-
-          <span class="card-enter-link">
-            <span>Ver Proyecto</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
+          <button type="button" class="btn-activate-project" onclick="promoteToActive('${repair.id}')" title="Activar esta iniciativa para comenzar su recaudación y compras">
+            🚀 Activar como Proyecto Activo
+          </button>
+          <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size:0.75rem; padding: 0.35rem 0.65rem;" title="Ver y editar ficha técnica">
+            Ver Ficha
+          </button>
         </div>
       </article>
     `;
