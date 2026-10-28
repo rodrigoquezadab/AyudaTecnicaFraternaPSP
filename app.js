@@ -1346,6 +1346,24 @@ window.promoteToActive = function(repairId) {
   }
 };
 
+window.activeFunnelStep = 'causa';
+
+window.setFunnelStep = function(step) {
+  window.activeFunnelStep = step;
+  const tabs = document.querySelectorAll('.funnel-step-tab');
+  const panels = document.querySelectorAll('.funnel-step-panel');
+  tabs.forEach(tab => {
+    tab.classList.toggle('active', tab.getAttribute('data-step') === step);
+  });
+  panels.forEach(panel => {
+    panel.classList.toggle('active', panel.getAttribute('data-step') === step);
+  });
+  const funnelEl = document.getElementById('project-funnel-section');
+  if (funnelEl) {
+    funnelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
 function renderRepairsGrid() {
   const filtered = getFilteredRepairs();
   const activePlaceName = currentFilterPlace === 'all' ? 'Cualquier Sector' : currentFilterPlace;
@@ -1543,15 +1561,17 @@ function renderRepairsGrid() {
   repairsContainer.className = 'repairs-grid';
 
   if (currentProjectSection === 'active') {
+    const activeStep = window.activeFunnelStep || 'causa';
+
     let html = `
       <div class="active-campaign-banner">
         <div class="active-campaign-badge">
           <span class="pulse-beacon"></span>
-          <span>PROYECTO PRIORITARIO PARROQUIAL EN CURSO</span>
+          <span>CAMPAÑA PARROQUIAL ACTIVA</span>
         </div>
-        <h2 class="active-campaign-title">Renovación de Pilas Recargables para Micrófonos</h2>
+        <h2 class="active-campaign-title">Pilas Recargables para los Micrófonos</h2>
         <p class="active-campaign-subtitle">
-          Todo el apoyo comunitario está focalizado en asegurar el audio litúrgico de los 6 micrófonos inalámbricos del Templo Mayor y la Capilla de Adoración Continua.
+          Iniciativa prioritaria para asegurar la transmisión y audio continuo en las misas de nuestra comunidad.
         </p>
       </div>
     `;
@@ -1577,31 +1597,28 @@ function renderRepairsGrid() {
       const remainingNeeded = Math.max(0, totalRepairCost - raised);
 
       html += `
+        <!-- Nivel 1 del Embudo: Entrada Simple, Directa y sin Saturación -->
         <article class="featured-active-card" data-id="${repair.id}">
           <div class="card-top">
             <div class="hierarchy-tags">
               <span class="tag tag-place">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-                ${escapeHtml(repair.place || 'Templo Mayor')}
-              </span>
-              <span class="tag tag-area">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-                ${escapeHtml(repair.area || 'Sonido')}
+                Templo Mayor & Capilla
               </span>
               <span class="tag tag-specialty">
-                🎙️ Audio y Megafonía
+                🎙️ Audio Litúrgico
               </span>
               <span class="tag tag-status-compras">
-                🟢 En Recaudación y Compras
-              </span>
-              <span class="tag tag-priority-alta">
-                Prioridad Alta
+                🟢 En Recaudación
               </span>
             </div>
           </div>
 
           <div class="card-main-body">
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
+            <p class="repair-lead-text">
+              Equipamiento con baterías recargables de alta duración para los 6 micrófonos inalámbricos parroquiales, evitando interrupciones durante las celebraciones.
+            </p>
           </div>
 
           <!-- Visualización en Paralelo: Recaudado vs Meta -->
@@ -1646,117 +1663,203 @@ function renderRepairsGrid() {
             </div>
           </div>
 
-          <!-- Direct Call to Action Buttons -->
-          <div class="active-actions-row">
-            <button type="button" class="btn-cta-donate" onclick="openDonationModal('${repair.id}')">
+          <!-- Acciones de Entrada al Embudo -->
+          <div class="funnel-entry-actions">
+            <button type="button" class="btn-funnel-donate" onclick="setFunnelStep('donar')" title="Ir directamente a los datos para donar">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              Hacer Donación por Transferencia
+              <span>Quiero Aportar / Ver Datos de Transferencia ↓</span>
             </button>
-            <a href="https://wa.me/56933484878?text=${encodeURIComponent('Hola Parroquia San Patricio, deseo realizar una donación para la compra de pilas recargables de los micrófonos.')}" target="_blank" class="btn-cta-whatsapp">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
-              Avisar Donación por WhatsApp
-            </a>
-          </div>
-
-          <!-- Embedded Instant Bank Transfer Card -->
-          <div class="instant-bank-card">
-            <div class="instant-bank-header">
-              <span>🏦 Datos Oficiales para Transferencia Bancaria</span>
-              <span style="font-size:0.75rem; font-weight:normal; color:var(--text-subtle);">Banco Santander Chile</span>
-            </div>
-
-            <div class="instant-bank-grid">
-              <div class="instant-bank-row">
-                <div>
-                  <span class="instant-bank-lbl">Cuenta Corriente</span>
-                  <span class="instant-bank-val">73235740</span>
-                </div>
-                <button type="button" class="btn-instant-copy" onclick="copyDonationField('73235740', this)">
-                  📋 Copiar
-                </button>
-              </div>
-
-              <div class="instant-bank-row">
-                <div>
-                  <span class="instant-bank-lbl">RUT Parroquia</span>
-                  <span class="instant-bank-val">82.566.800-4</span>
-                </div>
-                <button type="button" class="btn-instant-copy" onclick="copyDonationField('825668004', this)">
-                  📋 Copiar
-                </button>
-              </div>
-
-              <div class="instant-bank-row">
-                <div>
-                  <span class="instant-bank-lbl">Titular</span>
-                  <span class="instant-bank-val">Parroquia San Patricio</span>
-                </div>
-                <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia San Patricio', this)">
-                  📋 Copiar
-                </button>
-              </div>
-
-              <div class="instant-bank-row">
-                <div>
-                  <span class="instant-bank-lbl">Correo Comprobante</span>
-                  <span class="instant-bank-val" style="font-size:0.75rem;">secreparroquiasanpatricio@gmail.com</span>
-                </div>
-                <button type="button" class="btn-instant-copy" onclick="copyDonationField('secreparroquiasanpatricio@gmail.com', this)">
-                  📋 Copiar
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sodimac Product Reference Bar -->
-          <div class="product-sodimac-bar">
-            <div class="product-sodimac-info">
-              <div class="product-sodimac-icon">🔋</div>
-              <div class="product-sodimac-text">
-                <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V</span>
-                <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • 12 packs requeridos ($75.480)</span>
-              </div>
-            </div>
-            <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
-              Ver en Sodimac.cl ↗
-            </a>
-          </div>
-
-          <!-- Technical Rationale & Calculation Box -->
-          <div class="tech-calc-box">
-            <div class="tech-calc-title">
-              <span>💡 Justificación Técnica y Cálculo de la Meta:</span>
-            </div>
-            <ul class="tech-calc-list">
-              <li>
-                <span>🎙️</span>
-                <span><strong>6 micrófonos inalámbricos en total:</strong> 4 en el Templo Mayor y 2 en la Capilla de Adoración Continua.</span>
-              </li>
-              <li>
-                <span>🔋</span>
-                <span><strong>2 pilas AA por micrófono:</strong> 6 micrófonos × 2 pilas = <strong>12 pilas AA</strong> en uso simultáneo durante las misas y celebraciones.</span>
-              </li>
-              <li>
-                <span>🔄</span>
-                <span><strong>Rotación continua (doble juego):</strong> Se requiere el doble (12 × 2 = <strong>24 pilas</strong>) para que mientras un juego está operativo, el otro se encuentre cargando en sacristía.</span>
-              </li>
-              <li>
-                <span>📦</span>
-                <span><strong>12 packs de 2 pilas Energizer recargables</strong> a $6.290 cada uno en Sodimac = <strong>$75.480 monto meta total</strong>.</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Quick Actions & Administration -->
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="promptQuickDonation('${repair.id}')" style="font-size: 0.78rem;">
-              + Registrar Aporte Recibido
-            </button>
-            <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size: 0.78rem;">
-              ⚙️ Ver Ficha Técnica Completa
+            <button type="button" class="btn-funnel-guide" onclick="setFunnelStep('causa')" title="Conocer la justificación y cálculo paso a paso">
+              <span>📖 Conoce el Proyecto Paso a Paso ↓</span>
             </button>
           </div>
         </article>
+
+        <!-- Nivel 2 y 3 del Embudo: Contenido Guiado Progresivo -->
+        <section class="project-funnel-section" id="project-funnel-section">
+          <div class="funnel-section-header">
+            <span class="funnel-section-kicker">Guía del Proyecto Parroquial</span>
+            <h3 class="funnel-section-title">De la necesidad a la solución en 3 pasos</h3>
+            <p class="funnel-section-desc">Explora el porqué de esta iniciativa, cómo se calculó cada peso y cómo sumarte.</p>
+          </div>
+
+          <!-- Stepper Navegable del Embudo -->
+          <div class="funnel-stepper-tabs" role="tablist">
+            <button type="button" class="funnel-step-tab ${activeStep === 'causa' ? 'active' : ''}" data-step="causa" onclick="setFunnelStep('causa')">
+              <span class="step-num">1</span>
+              <span class="step-label">La Causa</span>
+            </button>
+            <button type="button" class="funnel-step-tab ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto" onclick="setFunnelStep('presupuesto')">
+              <span class="step-num">2</span>
+              <span class="step-label">Cálculo & Costo</span>
+            </button>
+            <button type="button" class="funnel-step-tab ${activeStep === 'donar' ? 'active' : ''}" data-step="donar" onclick="setFunnelStep('donar')">
+              <span class="step-num">3</span>
+              <span class="step-label">Cómo Donar</span>
+            </button>
+          </div>
+
+          <!-- Panel 1: La Causa (¿Por qué lo hacemos?) -->
+          <div class="funnel-step-panel ${activeStep === 'causa' ? 'active' : ''}" data-step="causa">
+            <div class="funnel-panel-header">
+              <h4>1. ¿Por qué necesitamos pilas recargables?</h4>
+              <p>Las misas y oraciones requieren una voz clara para el sacerdote, diáconos, lectores y coros parroquiales.</p>
+            </div>
+
+            <div class="funnel-reasons-grid">
+              <div class="funnel-reason-card">
+                <div class="reason-icon">🎙️</div>
+                <h5>Audio Continuo sin Cortes</h5>
+                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa y predecible en cada servicio.</p>
+              </div>
+
+              <div class="funnel-reason-card">
+                <div class="reason-icon">💰</div>
+                <h5>Ahorro Parroquial Permanente</h5>
+                <p>Comprar pilas alcalinas semanalmente es un gasto innecesario. Con un solo aporte dotamos a la parroquia de energía para más de 1.000 recargas.</p>
+              </div>
+
+              <div class="funnel-reason-card">
+                <div class="reason-icon">🌱</div>
+                <h5>Cuidado de la Creación</h5>
+                <p>Evitamos desechar cientos de pilas contaminantes al año en el sector, alineándonos con el compromiso de ecología integral.</p>
+              </div>
+            </div>
+
+            <div class="funnel-panel-actions">
+              <button type="button" class="btn-funnel-next" onclick="setFunnelStep('presupuesto')">
+                Siguiente: Ver cómo se calculó la meta ($75.480) →
+              </button>
+            </div>
+          </div>
+
+          <!-- Panel 2: Presupuesto y Cotización Técnica -->
+          <div class="funnel-step-panel ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto">
+            <div class="funnel-panel-header">
+              <h4>2. Cálculo Técnico Transparente de la Meta ($75.480)</h4>
+              <p>Así definimos el presupuesto exacto sin costos ocultos:</p>
+            </div>
+
+            <div class="tech-calc-box">
+              <ul class="tech-calc-list">
+                <li>
+                  <span>🎙️</span>
+                  <span><strong>6 micrófonos activos:</strong> 4 en el Templo Mayor y 2 en la Capilla de Adoración Continua.</span>
+                </li>
+                <li>
+                  <span>🔋</span>
+                  <span><strong>2 pilas AA por micrófono:</strong> 6 × 2 = <strong>12 pilas AA</strong> operando de manera simultánea.</span>
+                </li>
+                <li>
+                  <span>🔄</span>
+                  <span><strong>Rotación continua (2 juegos):</strong> Se requiere el doble (12 × 2 = <strong>24 pilas</strong>) para que mientras un juego está en uso en el altar, el juego de relevo se recargue en sacristía.</span>
+                </li>
+                <li>
+                  <span>📦</span>
+                  <span><strong>12 packs de 2 pilas Energizer Recargables AA (2000 mAh):</strong> A $6.290 cada pack en Sodimac = <strong>$75.480 total</strong>.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Sodimac Product Reference Bar -->
+            <div class="product-sodimac-bar" style="margin-top: 1rem;">
+              <div class="product-sodimac-info">
+                <div class="product-sodimac-icon">🔋</div>
+                <div class="product-sodimac-text">
+                  <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V</span>
+                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • 12 packs requeridos ($75.480)</span>
+                </div>
+              </div>
+              <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
+                Verificar en Sodimac.cl ↗
+              </a>
+            </div>
+
+            <div class="funnel-panel-actions">
+              <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('causa')">
+                ← Volver a La Causa
+              </button>
+              <button type="button" class="btn-funnel-next" onclick="setFunnelStep('donar')">
+                Siguiente: ¿Cómo realizar tu aporte? →
+              </button>
+            </div>
+          </div>
+
+          <!-- Panel 3: Datos de Transferencia y Canales de Aporte -->
+          <div class="funnel-step-panel ${activeStep === 'donar' ? 'active' : ''}" data-step="donar">
+            <div class="funnel-panel-header">
+              <h4>3. Canales Oficiales para Donar</h4>
+              <p>Tu donación, cualquiera sea el monto, va 100% destinada a esta adquisición técnica.</p>
+            </div>
+
+            <!-- Embedded Instant Bank Transfer Card -->
+            <div class="instant-bank-card">
+              <div class="instant-bank-header">
+                <span>🏦 Datos Oficiales para Transferencia Bancaria</span>
+                <span style="font-size:0.75rem; font-weight:normal; color:var(--text-subtle);">Banco Santander Chile</span>
+              </div>
+
+              <div class="instant-bank-grid">
+                <div class="instant-bank-row">
+                  <div>
+                    <span class="instant-bank-lbl">Cuenta Corriente</span>
+                    <span class="instant-bank-val">73235740</span>
+                  </div>
+                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('73235740', this)">
+                    📋 Copiar
+                  </button>
+                </div>
+
+                <div class="instant-bank-row">
+                  <div>
+                    <span class="instant-bank-lbl">RUT Parroquia</span>
+                    <span class="instant-bank-val">82.566.800-4</span>
+                  </div>
+                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('825668004', this)">
+                    📋 Copiar
+                  </button>
+                </div>
+
+                <div class="instant-bank-row">
+                  <div>
+                    <span class="instant-bank-lbl">Titular</span>
+                    <span class="instant-bank-val">Parroquia San Patricio</span>
+                  </div>
+                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia San Patricio', this)">
+                    📋 Copiar
+                  </button>
+                </div>
+
+                <div class="instant-bank-row">
+                  <div>
+                    <span class="instant-bank-lbl">Correo Comprobante</span>
+                    <span class="instant-bank-val" style="font-size:0.75rem;">secreparroquiasanpatricio@gmail.com</span>
+                  </div>
+                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('secreparroquiasanpatricio@gmail.com', this)">
+                    📋 Copiar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de Acción de Donación -->
+            <div class="active-actions-row" style="margin-top: 1rem;">
+              <a href="https://wa.me/56933484878?text=${encodeURIComponent('Hola Parroquia San Patricio, deseo avisar una donación para las pilas recargables de los micrófonos.')}" target="_blank" class="btn-cta-whatsapp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                <span>Avisar Donación por WhatsApp</span>
+              </a>
+              <button type="button" class="btn btn-secondary" onclick="promptQuickDonation('${repair.id}')">
+                + Registrar Aporte Recibido
+              </button>
+            </div>
+
+            <div class="funnel-panel-actions">
+              <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('presupuesto')">
+                ← Volver al Cálculo de la Meta
+              </button>
+            </div>
+          </div>
+        </section>
       `;
     });
 
