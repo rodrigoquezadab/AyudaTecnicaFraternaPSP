@@ -791,6 +791,7 @@ let currentFilterArea = 'all';
 let searchQuery = '';
 let sortBy = 'recent';
 let currentViewMode = localStorage.getItem('parroquia_view_mode') || 'grid';
+let currentProjectSection = 'active'; // 'active' (Proyecto Activo) or 'backlog' (Proyectos por Realizar)
 
 // Catalog State
 let catalogSearchQuery = '';
@@ -1048,14 +1049,25 @@ function calculateMetrics() {
   if (statProgressRatio) statProgressRatio.textContent = `${boughtItemsCount} / ${totalItemsCount}`;
   if (statProgressPercent) statProgressPercent.textContent = `${progressPercent}%`;
   if (statProgressBar) statProgressBar.style.width = `${progressPercent}%`;
+
+  // Update tab badge counters
+  const activeCount = appData.repairs.filter(r => (r.status || '') !== 'planificacion').length;
+  const backlogCount = appData.repairs.filter(r => (r.status || '') === 'planificacion').length;
+  const badgeActive = document.getElementById('badge-active-count');
+  const badgeBacklog = document.getElementById('badge-backlog-count');
+  if (badgeActive) badgeActive.textContent = activeCount;
+  if (badgeBacklog) badgeBacklog.textContent = backlogCount;
 }
 
 /* ==========================================================================
    Rendering Filter Pills & Area Chips
    ========================================================================== */
 function renderFilterPills() {
-  // Extract unique places ONLY from visible (active) projects
-  const visibleRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
+  // Extract unique places based on current active section (active vs backlog)
+  const visibleRepairs = currentProjectSection === 'active'
+    ? appData.repairs.filter(r => (r.status || '') !== 'planificacion')
+    : appData.repairs.filter(r => (r.status || '') === 'planificacion');
+
   const placeCounts = {};
   visibleRepairs.forEach(rep => {
     const place = rep.place?.trim() || 'Sin Lugar';
@@ -1087,7 +1099,10 @@ function renderFilterPills() {
 
 function renderAreaChips() {
   // Filter visible repairs by current selected place
-  const visibleRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
+  const visibleRepairs = currentProjectSection === 'active'
+    ? appData.repairs.filter(r => (r.status || '') !== 'planificacion')
+    : appData.repairs.filter(r => (r.status || '') === 'planificacion');
+
   const relevantRepairs = currentFilterPlace === 'all'
     ? visibleRepairs
     : visibleRepairs.filter(r => (r.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
@@ -1205,8 +1220,12 @@ function setupNotesStamping() {
 function getFilteredRepairs() {
   let list = [...appData.repairs];
 
-  // Hide future/planned projects from the main view (they are not active yet)
-  list = list.filter(r => (r.status || '') !== 'planificacion');
+  // Filter by active vs backlog section
+  if (currentProjectSection === 'active') {
+    list = list.filter(r => (r.status || '') !== 'planificacion');
+  } else {
+    list = list.filter(r => (r.status || '') === 'planificacion');
+  }
 
   // Filter by Place (Sector Parroquial)
   if (currentFilterPlace !== 'all') {
@@ -1261,6 +1280,36 @@ function getFilteredRepairs() {
   return list;
 }
 
+window.switchProjectSection = function(section) {
+  currentProjectSection = section;
+  currentFilterPlace = 'all';
+  currentFilterArea = 'all';
+
+  const tabActive = document.getElementById('tab-active-projects');
+  const tabBacklog = document.getElementById('tab-backlog-projects');
+
+  if (tabActive && tabBacklog) {
+    tabActive.classList.toggle('active', section === 'active');
+    tabActive.setAttribute('aria-selected', section === 'active');
+    tabBacklog.classList.toggle('active', section === 'backlog');
+    tabBacklog.setAttribute('aria-selected', section === 'backlog');
+  }
+
+  updateUI();
+};
+
+window.promoteToActive = function(repairId) {
+  const repair = appData.repairs.find(r => r.id === repairId);
+  if (!repair) return;
+
+  if (confirm(`¿Deseas activar el proyecto "${repair.title}" e iniciar su campaña de compras/recaudación?`)) {
+    repair.status = 'compras';
+    saveData();
+    showToast(`¡Proyecto "${repair.title}" activado exitosamente!`);
+    window.switchProjectSection('active');
+  }
+};
+
 function renderRepairsGrid() {
   const filtered = getFilteredRepairs();
   const activePlaceName = currentFilterPlace === 'all' ? 'Cualquier Sector' : currentFilterPlace;
@@ -1272,6 +1321,18 @@ function renderRepairsGrid() {
     ejecucion: 'En Ejecución',
     completado: 'Completado'
   };
+
+  const backlogBannerHtml = `
+    <div class="backlog-banner">
+      <div class="backlog-banner-icon">📋</div>
+      <div class="backlog-banner-body">
+        <div class="backlog-banner-title">Banco de Proyectos Técnicos Parroquiales (Backlog / Por Realizar)</div>
+        <div class="backlog-banner-desc">
+          Estas iniciativas técnicas e infraestructurales ya cuentan con su diagnóstico, cotizaciones y materiales especificados. Se encuentran en espera para focalizar los esfuerzos comunitarios en la compra activa de pilas recargables para micrófonos.
+        </div>
+      </div>
+    </div>
+  `;
 
   // Quick Add HTML for List View or Location View
   const quickAddHtml = `
@@ -1305,12 +1366,13 @@ function renderRepairsGrid() {
   if (filtered.length === 0) {
     repairsContainer.className = 'repairs-container';
     repairsContainer.innerHTML = `
+      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
       ${currentViewMode === 'list' ? quickAddHtml : ''}
       <div class="empty-state" style="grid-column: 1 / -1;">
-        <div class="empty-icon">🍀</div>
-        <h3 style="font-size: 1.15rem; font-family: var(--font-heading);">No se encontraron proyectos parroquiales</h3>
+        <div class="empty-icon">${currentProjectSection === 'backlog' ? '📋' : '🍀'}</div>
+        <h3 style="font-size: 1.15rem; font-family: var(--font-heading);">${currentProjectSection === 'backlog' ? 'No hay proyectos en el backlog' : 'No hay proyectos activos'}</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 440px;">
-          ${searchQuery ? `No hay resultados para "${escapeHtml(searchQuery)}". Intenta con otra palabra clave (ej: LED, audio, templo) o limpia los filtros.` : 'Aún no tienes proyectos registrados en este sector. Registra una nueva iniciativa técnica para transparentar sus materiales y recaudar aportes.'}
+          ${searchQuery ? `No hay resultados para "${escapeHtml(searchQuery)}". Intenta con otra palabra clave o limpia los filtros.` : (currentProjectSection === 'backlog' ? 'Todas las iniciativas técnicas están actualmente activas o completadas.' : 'Actualmente no hay campañas en curso en este sector.')}
         </p>
         <button class="btn btn-primary btn-sm" onclick="openRepairModal()" style="background: linear-gradient(135deg, #15803d, #16a34a);">+ Nuevo Proyecto</button>
       </div>
@@ -1392,12 +1454,21 @@ function renderRepairsGrid() {
           </td>
           <td>
             <div class="list-actions-cell" onclick="event.stopPropagation();">
-              <button class="btn-donate-card" style="padding: 0.28rem 0.55rem; font-size: 0.72rem;" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto">
-                Donar
-              </button>
-              <button class="card-manage-btn" onclick="editRepair('${repair.id}')" title="Entrar al proyecto">
-                Ver
-              </button>
+              ${repair.status === 'planificacion' ? `
+                <button class="btn-activate-project" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="promoteToActive('${repair.id}')" title="Activar proyecto e iniciar compras">
+                  🚀 Activar
+                </button>
+                <button class="card-manage-btn" onclick="editRepair('${repair.id}')" title="Entrar al proyecto">
+                  Ver
+                </button>
+              ` : `
+                <button class="btn-donate-card" style="padding: 0.28rem 0.55rem; font-size: 0.72rem;" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto">
+                  Donar
+                </button>
+                <button class="card-manage-btn" onclick="editRepair('${repair.id}')" title="Entrar al proyecto">
+                  Ver
+                </button>
+              `}
               <button class="icon-btn-ghost delete" title="Eliminar proyecto" onclick="deleteRepair('${repair.id}')" aria-label="Eliminar">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
@@ -1408,6 +1479,7 @@ function renderRepairsGrid() {
     }).join('');
 
     repairsContainer.innerHTML = `
+      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
       ${quickAddHtml}
       <div class="repairs-list-wrapper">
         <table class="repairs-list-table">
@@ -1433,7 +1505,7 @@ function renderRepairsGrid() {
 
   // GRID VIEW MODE (Rich Parish Project Cards)
   repairsContainer.className = 'repairs-grid';
-  let html = '';
+  let html = currentProjectSection === 'backlog' ? backlogBannerHtml : '';
 
   filtered.forEach(repair => {
     const items = repair.items || [];
@@ -1502,10 +1574,10 @@ function renderRepairsGrid() {
           <div class="funding-header">
             <span class="funding-title">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              Meta & Recaudación Solidaria
+              ${repair.status === 'planificacion' ? 'Presupuesto Planificado' : 'Meta & Recaudación Solidaria'}
             </span>
             <span class="funding-pct-badge ${fundingPct >= 100 ? 'funded' : 'in-progress'}">
-              ${fundingPct}% Financiado
+              ${repair.status === 'planificacion' ? 'En Backlog' : `${fundingPct}% Financiado`}
             </span>
           </div>
 
@@ -1516,7 +1588,7 @@ function renderRepairsGrid() {
           <div class="funding-footer-stats">
             <span>Aportado: <strong>${formatCurrency(raised)}</strong></span>
             <span>Meta: <strong>${formatCurrency(totalRepairCost)}</strong></span>
-            ${fundingPct >= 100 ? '<span class="completed-text">¡100% Financiado!</span>' : `<span class="remaining-text">Faltan ${formatCurrency(remainingNeeded)}</span>`}
+            ${fundingPct >= 100 ? '<span class="completed-text">¡100% Financiado!</span>' : `<span class="remaining-text">${repair.status === 'planificacion' ? 'Presupuesto en espera' : `Faltan ${formatCurrency(remainingNeeded)}`}</span>`}
           </div>
         </div>
 
@@ -1535,15 +1607,24 @@ function renderRepairsGrid() {
           ` : ''}
         </div>
 
-        <!-- Action Row: Donate to this project or log donation -->
+        <!-- Action Row: Donate to this project, log donation, or activate from backlog -->
         <div class="card-donation-row" onclick="event.stopPropagation();">
-          <button type="button" class="btn-donate-card" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto parroquial con transferencia a Santander">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            Donar a este Proyecto
-          </button>
-          <button type="button" class="btn-log-donation" onclick="promptQuickDonation('${repair.id}')" title="Registrar aporte de bienhechor en la plataforma">
-            + Aporte
-          </button>
+          ${repair.status === 'planificacion' ? `
+            <button type="button" class="btn-activate-project" onclick="promoteToActive('${repair.id}')" title="Activar esta iniciativa para comenzar su recaudación y compras">
+              🚀 Activar como Proyecto Activo
+            </button>
+            <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size:0.75rem; padding: 0.35rem 0.65rem;" title="Ver y editar ficha técnica">
+              Ver Ficha
+            </button>
+          ` : `
+            <button type="button" class="btn-donate-card" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto parroquial con transferencia a Santander">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              Donar a este Proyecto
+            </button>
+            <button type="button" class="btn-log-donation" onclick="promptQuickDonation('${repair.id}')" title="Registrar aporte de bienhechor en la plataforma">
+              + Aporte
+            </button>
+          `}
         </div>
 
         <!-- Clean Card Footer -->
