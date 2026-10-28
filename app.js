@@ -433,7 +433,7 @@ const SAMPLE_DATA = [
     title: 'Compra de Pilas Recargables AA Energizer para Micrófonos (Templo y Capilla)',
     description: '[27/10/2026 23:45] ⏱️ Necesidad identificada: Los 6 micrófonos inalámbricos de la parroquia (4 en el Templo Mayor y 2 en la Capilla de Adoración Continua) funcionan con 2 pilas AA cada uno. Se requiere un set de reemplazo en rotación para que, mientras un juego de pilas está en uso, el otro se está cargando.\\n\\n[27/10/2026 23:45] 📏 Cálculo de necesidad:\\n• 4 micrófonos (Templo Mayor) + 2 micrófonos (Capilla) = 6 micrófonos\\n• 6 micrófonos × 2 pilas AA = 12 pilas en uso simultáneo\\n• Sistema de rotación (doble juego) = 12 × 2 = 24 pilas AA en total\\n• Pack Energizer Recargables = 2 pilas → 24 ÷ 2 = 12 packs necesarios\\n\\n[27/10/2026 23:45] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). Alta capacidad y confiabilidad para uso litúrgico continuo. Verificar disponibilidad de cargador multi-bahía operativo antes de la compra.',
     priority: 'alta',
-    raisedAmount: 0,
+    raisedAmount: 5000,
     hasLabor: false,
     laborCost: 0,
     createdAt: Date.now() + 9000,
@@ -1022,7 +1022,10 @@ function calculateMetrics() {
   let boughtItemsCount = 0;
   let repairsWithLaborCount = 0;
 
-  appData.repairs.forEach(rep => {
+  // Only count active and completed projects (exclude future/planned ones)
+  const activeRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
+
+  activeRepairs.forEach(rep => {
     if (rep.hasLabor && rep.laborCost > 0) {
       laborTotal += Number(rep.laborCost) || 0;
       repairsWithLaborCount++;
@@ -1051,7 +1054,7 @@ function calculateMetrics() {
     : 0;
 
   if (statGrandTotal) statGrandTotal.textContent = formatCurrency(grandTotal);
-  if (statProjectsCount) statProjectsCount.textContent = `${appData.repairs.length} proyecto${appData.repairs.length === 1 ? '' : 's'} registrado${appData.repairs.length === 1 ? '' : 's'}`;
+  if (statProjectsCount) statProjectsCount.textContent = `${activeRepairs.length} proyecto${activeRepairs.length === 1 ? '' : 's'} registrado${activeRepairs.length === 1 ? '' : 's'}`;
   if (statFundsTotal) statFundsTotal.textContent = formatCurrency(totalRaised);
   if (statFundsPercent) statFundsPercent.textContent = `${fundsPercent}% de la meta recaudado (${formatCurrency(totalRaised)})`;
   if (statRemainingTotal) statRemainingTotal.textContent = formatCurrency(remainingTotal);
@@ -1213,6 +1216,9 @@ function setupNotesStamping() {
    ========================================================================== */
 function getFilteredRepairs() {
   let list = [...appData.repairs];
+
+  // Hide future/planned projects from the main view (they are not active yet)
+  list = list.filter(r => (r.status || '') !== 'planificacion');
 
   // Filter by Place (Sector Parroquial)
   if (currentFilterPlace !== 'all') {
