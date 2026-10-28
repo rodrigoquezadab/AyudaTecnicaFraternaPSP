@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v2';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v4';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -431,7 +431,7 @@ const SAMPLE_DATA = [
     specialty: 'Audio y Megafonía',
     status: 'compras',
     title: 'Compra de Pilas Recargables AA Energizer para Micrófonos (Templo y Capilla)',
-    description: '[27/10/2026 23:45] ⏱️ Necesidad identificada: Los 6 micrófonos inalámbricos de la parroquia (4 en el Templo Mayor y 2 en la Capilla de Adoración Continua) funcionan con 2 pilas AA cada uno. Se requiere un set de reemplazo en rotación para que, mientras un juego de pilas está en uso, el otro se está cargando.\\n\\n[27/10/2026 23:45] 📏 Cálculo de necesidad:\\n• 4 micrófonos (Templo Mayor) + 2 micrófonos (Capilla) = 6 micrófonos\\n• 6 micrófonos × 2 pilas AA = 12 pilas en uso simultáneo\\n• Sistema de rotación (doble juego) = 12 × 2 = 24 pilas AA en total\\n• Pack Energizer Recargables = 2 pilas → 24 ÷ 2 = 12 packs necesarios\\n\\n[27/10/2026 23:45] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). Alta capacidad y confiabilidad para uso litúrgico continuo. Verificar disponibilidad de cargador multi-bahía operativo antes de la compra.',
+    description: '[27/10/2026 23:45] ⏱️ Necesidad identificada: Los 6 micrófonos inalámbricos de la parroquia (4 en el Templo Mayor y 2 en la Capilla de Adoración Continua) funcionan con 2 pilas AA cada uno. Se requiere un set de reemplazo en rotación para que, mientras un juego de pilas está en uso, el otro se esté cargando.\n\n[27/10/2026 23:45] 📏 Cálculo de necesidad:\n• 4 micrófonos (Templo Mayor) + 2 micrófonos (Capilla) = 6 micrófonos\n• 6 micrófonos × 2 pilas AA = 12 pilas en uso simultáneo\n• Sistema de rotación (doble juego) = 12 × 2 = 24 pilas AA en total\n• Pack Energizer Recargables = 2 pilas → 24 ÷ 2 = 12 packs necesarios\n\n[27/10/2026 23:45] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). Alta capacidad y confiabilidad para uso litúrgico continuo. Verificar disponibilidad de cargador multi-bahía operativo antes de la compra.',
     priority: 'alta',
     raisedAmount: 5000,
     hasLabor: false,
@@ -449,7 +449,7 @@ const SAMPLE_DATA = [
     ]
   },
 
-  // ── PROYECTOS FUTUROS / COMPLETADOS ─────────────────────────────────────────
+  // ── PROYECTOS FUTUROS (EN PLANIFICACIÓN) ────────────────────────────────────
   {
     id: 'rep_parroquia_entrada_banos',
     place: 'Exteriores y Pasillos',
@@ -459,7 +459,7 @@ const SAMPLE_DATA = [
     title: 'Iluminación Todo-en-Uno con Sensor PIR y Crepuscular en Acceso y Baños',
     description: '[01/09/2026 11:00] ⏱️ Inicio de Proyecto: Instalación de luminaria exterior todo-en-uno que incorpora LED + Sensor PIR + Sensor Crepuscular LUX + IP65 en un solo equipo hermético para el acceso exterior hacia los baños comunitarios.\n\n[01/09/2026 11:15] 💡 Elección Técnica: Proyector LED SOFTLIGHT 30W IP65 ($13.900) con carcasa de aluminio fundido y protección UV contra radiación solar y lluvia, caja estanca de paso y cable libre de halógeno.\n\n[01/09/2026 11:30] 🌙 Regulación Crepuscular: Bloqueo en horario diurno. El foco solo activa su detección con poca luz ambiental nocturna.',
     priority: 'alta',
-    raisedAmount: 20000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 18000,
     createdAt: Date.now() + 7000,
@@ -499,7 +499,7 @@ const SAMPLE_DATA = [
     title: 'Iluminación a Demanda en Pasillo Jardín y Baños Exteriores (IP65)',
     description: '[01/09/2026 10:15] ⏱️ Diagnóstico: Pasillos exteriores permanentemente expuestos a lluvia y sol. Se requiere automatizar dos luminarias herméticas de 18W para tránsito seguro en eventos y misas vespertinas.\n\n[01/09/2026 10:30] 💡 Elección Técnica: Sensor DEMASLED 200° IP65 sobrepuesto en muro ($11.896) con haz focalizado longitudinal. Dos luminarias herméticas LED 18W luz fría ($8.990 c/u).\n\n[01/09/2026 10:45] 📏 Montaje: Ubicar sensor bajo alero a 2.2m de altura. Calibrar temporizador en 4 minutos.',
     priority: 'alta',
-    raisedAmount: 45000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 25000,
     createdAt: Date.now() + 6000,
@@ -543,11 +543,11 @@ const SAMPLE_DATA = [
     place: 'Templo Mayor',
     area: 'Baños Principales',
     specialty: 'Electricidad e Iluminación',
-    status: 'completado',
+    status: 'planificacion',
     title: 'Automatización e Iluminación LED 12W con Sensor 360° en Baño de Hombres y Mujeres',
-    description: '[15/08/2026 09:00] ⏱️ Proyecto Finalizado con éxito: Se instaló sensor relé 360° en cielo falso y dos plafones LED de 12W. Temporizador fijado en 3 minutos. Reducción estimada de 70% en consumo eléctrico en baños.',
+    description: '[15/08/2026 09:00] ⏱️ Planificación: Instalación de sensor relé 360° en cielo falso y dos plafones LED de 12W. Temporizador fijado en 3 minutos. Reducción estimada de 70% en consumo eléctrico en baños.',
     priority: 'media',
-    raisedAmount: 43980,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 20000,
     createdAt: Date.now() + 5000,
@@ -558,7 +558,7 @@ const SAMPLE_DATA = [
         price: 4990,
         qty: 2,
         url: 'https://sodimac.falabella.com/sodimac-cl/search?Ntt=panel+led+12w+sobrepuesto',
-        bought: true
+        bought: false
       },
       {
         id: 'itm_parroquia_2',
@@ -566,7 +566,7 @@ const SAMPLE_DATA = [
         price: 9500,
         qty: 1,
         url: 'https://electricidadfernandez.cl/product/sensor-infrarrojo-cielo-360-lexo/?utm_source=chatgpt.com',
-        bought: true
+        bought: false
       },
       {
         id: 'itm_parroquia_3',
@@ -574,7 +574,7 @@ const SAMPLE_DATA = [
         price: 4500,
         qty: 1,
         url: 'https://www.easy.cl/search?q=cable+1.5mm',
-        bought: true
+        bought: false
       }
     ]
   },
@@ -587,7 +587,7 @@ const SAMPLE_DATA = [
     title: 'Renovación de Sistema de Micrófonos Inalámbricos UHF y Cableado Balanceado XLR',
     description: '[20/09/2026 18:00] ⏱️ Diagnóstico: Interferencia y ruidos de masa en micrófonos actuales durante la misa dominical. Los cables del ambón presentan desgaste en conectores.\n\n[22/09/2026 12:00] 💡 Propuesta Técnica: Sistema de doble micrófono inalámbrico UHF multicanal (antinterferencia) para sacerdotes y lectores, 4 líneas balanceadas con cable libre de oxígeno y conectores Neutrik XLR dorados, más 2 cajas directas pasivas para instrumentos del coro.\n\n[25/09/2026 16:00] 📏 Medición: Distancia entre consola en sacristía y ambón: 18 metros.',
     priority: 'urgente',
-    raisedAmount: 95000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 35000,
     createdAt: Date.now() + 4000,
@@ -627,7 +627,7 @@ const SAMPLE_DATA = [
     title: 'Sistema de Transmisión y Streaming HDMI para Eucaristías Online y Redes Sociales',
     description: '[10/09/2026 17:30] ⏱️ Diagnóstico: Se transmiten misas por YouTube/Facebook para enfermos, adultos mayores y familias de la comunidad, pero con teléfono móvil inestable y baja resolución.\n\n[12/09/2026 11:00] 💡 Propuesta: Instalar cámara fija con salida limpia HDMI Full HD, capturadora USB 3.0 / OBS, extensor HDMI blindado de 15m y soporte seguro en columna.\n\n[14/09/2026 15:00] 📏 Pruebas: Conexión de red por cable directo al router de secretaría para garantizar streaming continuo en 1080p sin cortes.',
     priority: 'alta',
-    raisedAmount: 80000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 25000,
     createdAt: Date.now() + 3000,
@@ -671,11 +671,11 @@ const SAMPLE_DATA = [
     place: 'Oficinas y Secretaría',
     area: 'Despacho Pastoral',
     specialty: 'Informática y Redes',
-    status: 'completado',
+    status: 'planificacion',
     title: 'Extensión de Red Wi-Fi Mesh y Respaldo Eléctrico UPS en Secretaría Parroquial',
-    description: '[05/09/2026 10:00] ⏱️ Proyecto Concluido: Instalación de 2 nodos Wi-Fi Mesh Gigabit para dotar de excelente cobertura a secretaría, salas de catequesis y despacho. Se instaló UPS interactiva 1200VA para proteger computadores e impresoras ante cortes y bajas de voltaje.',
+    description: '[05/09/2026 10:00] ⏱️ Planificación: Instalación de 2 nodos Wi-Fi Mesh Gigabit para dotar de excelente cobertura a secretaría, salas de catequesis y despacho. Se instalará UPS interactiva 1200VA para proteger computadores e impresoras ante cortes y bajas de voltaje.',
     priority: 'alta',
-    raisedAmount: 145000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 20000,
     createdAt: Date.now() + 2000,
@@ -686,7 +686,7 @@ const SAMPLE_DATA = [
         price: 79990,
         qty: 1,
         url: 'https://www.pcfactory.cl',
-        bought: true
+        bought: false
       },
       {
         id: 'itm_wifi_2',
@@ -694,7 +694,7 @@ const SAMPLE_DATA = [
         price: 45010,
         qty: 1,
         url: 'https://www.pcfactory.cl',
-        bought: true
+        bought: false
       }
     ]
   },
@@ -707,7 +707,7 @@ const SAMPLE_DATA = [
     title: 'Mantención Preventiva y Cambio de Filtros en 6 Equipos de Climatización Split',
     description: '[18/09/2026 14:00] ⏱️ Mantenimiento preventivo de los equipos split que brindan calefacción en invierno y refrigeración en misas diarias y salas de catequesis.\n\n[19/09/2026 10:00] 💡 Tareas: Limpieza química desincrustante de evaporadores y condensadores, desinfección bactericida de turbinas, lavado de filtros y verificación de gas refrigerante.',
     priority: 'media',
-    raisedAmount: 50000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 85000,
     createdAt: Date.now() + 1000,
@@ -747,7 +747,7 @@ const SAMPLE_DATA = [
     title: 'Renovación de Telón y Soporte para Proyector en Salón de Retiros',
     description: '[02/09/2026 16:00] ⏱️ Planificación: El salón de la Casa de la Sagrada Familia acoge retiros de hasta 100 personas de distintas comunidades. Se requiere telón retráctil de 100 pulgadas y soporte universal a techo para proyector.',
     priority: 'baja',
-    raisedAmount: 30000,
+    raisedAmount: 0,
     hasLabor: true,
     laborCost: 25000,
     createdAt: Date.now(),
@@ -966,25 +966,11 @@ function loadData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.repairs)) {
+      if (Array.isArray(parsed.repairs) && parsed.repairs.length > 0) {
         appData = parsed;
 
-        // Ensure all Parroquia projects exist
-        const hasEntrada = appData.repairs.some(r => r.id === 'rep_parroquia_entrada_banos' || r.area === 'Entrada Baños Principales');
-        if (!hasEntrada) {
-          appData.repairs.unshift(JSON.parse(JSON.stringify(SAMPLE_DATA[0])));
-        }
-        const hasPasillo = appData.repairs.some(r => r.id === 'rep_parroquia_pasillo' || r.area === 'Pasillo Jardín Baños');
-        if (!hasPasillo) {
-          appData.repairs.splice(1, 0, JSON.parse(JSON.stringify(SAMPLE_DATA[1])));
-        }
-        const hasBano = appData.repairs.some(r => r.id === 'rep_parroquia_bano' || r.area === 'Baño Principal de Hombres');
-        if (!hasBano) {
-          appData.repairs.splice(2, 0, JSON.parse(JSON.stringify(SAMPLE_DATA[2])));
-        }
-
-        // Ensure catalog is updated with latest all-in-one sensors and comparison data
-        if (!Array.isArray(appData.catalog) || appData.catalog.length === 0 || !appData.catalog.some(c => c.id === 'cat_softlight_30w_pir')) {
+        // Ensure catalog is loaded
+        if (!Array.isArray(appData.catalog) || appData.catalog.length === 0) {
           appData.catalog = JSON.parse(JSON.stringify(INITIAL_CATALOG));
         }
         saveData();
@@ -1022,7 +1008,7 @@ function calculateMetrics() {
   let boughtItemsCount = 0;
   let repairsWithLaborCount = 0;
 
-  // Only count active and completed projects (exclude future/planned ones)
+  // Only count active projects (exclude future/planned ones)
   const activeRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
 
   activeRepairs.forEach(rep => {
@@ -1054,9 +1040,9 @@ function calculateMetrics() {
     : 0;
 
   if (statGrandTotal) statGrandTotal.textContent = formatCurrency(grandTotal);
-  if (statProjectsCount) statProjectsCount.textContent = `${activeRepairs.length} proyecto${activeRepairs.length === 1 ? '' : 's'} registrado${activeRepairs.length === 1 ? '' : 's'}`;
+  if (statProjectsCount) statProjectsCount.textContent = `${activeRepairs.length} proyecto${activeRepairs.length === 1 ? ' activo' : 's activos'}`;
   if (statFundsTotal) statFundsTotal.textContent = formatCurrency(totalRaised);
-  if (statFundsPercent) statFundsPercent.textContent = `${fundsPercent}% de la meta recaudado (${formatCurrency(totalRaised)})`;
+  if (statFundsPercent) statFundsPercent.textContent = `${fundsPercent}% recaudado (${formatCurrency(totalRaised)} de ${formatCurrency(grandTotal)})`;
   if (statRemainingTotal) statRemainingTotal.textContent = formatCurrency(remainingTotal);
 
   if (statProgressRatio) statProgressRatio.textContent = `${boughtItemsCount} / ${totalItemsCount}`;
@@ -1068,9 +1054,10 @@ function calculateMetrics() {
    Rendering Filter Pills & Area Chips
    ========================================================================== */
 function renderFilterPills() {
-  // Extract unique places
+  // Extract unique places ONLY from visible (active) projects
+  const visibleRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
   const placeCounts = {};
-  appData.repairs.forEach(rep => {
+  visibleRepairs.forEach(rep => {
     const place = rep.place?.trim() || 'Sin Lugar';
     placeCounts[place] = (placeCounts[place] || 0) + 1;
   });
@@ -1079,7 +1066,7 @@ function renderFilterPills() {
 
   let html = `
     <button class="pill-btn ${currentFilterPlace === 'all' ? 'active' : ''}" data-place="all">
-      Todos <span class="pill-count">${appData.repairs.length}</span>
+      Todos <span class="pill-count">${visibleRepairs.length}</span>
     </button>
   `;
 
@@ -1099,10 +1086,11 @@ function renderFilterPills() {
 }
 
 function renderAreaChips() {
-  // Filter repairs by current selected place
+  // Filter visible repairs by current selected place
+  const visibleRepairs = appData.repairs.filter(r => (r.status || '') !== 'planificacion');
   const relevantRepairs = currentFilterPlace === 'all'
-    ? appData.repairs
-    : appData.repairs.filter(r => (r.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
+    ? visibleRepairs
+    : visibleRepairs.filter(r => (r.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
 
   const areaCounts = {};
   relevantRepairs.forEach(rep => {
@@ -2118,25 +2106,11 @@ window.openDonationModal = function(projectId = null) {
       }
     }
   } else {
-    // General parish donations
-    let totalGoal = 0;
-    let totalRaised = 0;
-    appData.repairs.forEach(r => {
-      const matCost = (r.items || []).reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.qty) || 1)), 0);
-      const labor = r.hasLabor ? (Number(r.laborCost) || 0) : 0;
-      totalGoal += matCost + labor;
-      totalRaised += Number(r.raisedAmount) || 0;
-    });
-
-    if (targetName) targetName.textContent = 'Fondo General de Reparaciones y Mejoras Parroquiales';
-    if (targetGoal) targetGoal.textContent = formatCurrency(totalGoal);
-    if (targetRaised) targetRaised.textContent = formatCurrency(totalRaised);
-    if (targetNeeded) targetNeeded.textContent = formatCurrency(Math.max(0, totalGoal - totalRaised));
-    if (copySubject) copySubject.textContent = 'Donación Proyectos Técnicos Parroquia San Patricio';
-
-    if (waBtn) {
-      const text = encodeURIComponent(`Hola Parroquia San Patricio, acabo de realizar una donación para los proyectos técnicos y de mantención de la parroquia. Envío mi comprobante de transferencia a Banco Santander.`);
-      waBtn.href = `https://wa.me/56933484878?text=${text}`;
+    // Si no se especifica proyecto, dirigir directamente al proyecto activo actual
+    const activeProject = appData.repairs.find(r => (r.status || '') !== 'planificacion') || appData.repairs[0];
+    if (activeProject) {
+      window.openDonationModal(activeProject.id);
+      return;
     }
   }
 
