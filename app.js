@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v4';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v7';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -974,6 +974,18 @@ function loadData() {
         if (!Array.isArray(appData.catalog) || appData.catalog.length === 0) {
           appData.catalog = JSON.parse(JSON.stringify(INITIAL_CATALOG));
         }
+
+        // Guarantee by default that only the active battery project is shown as active, others in backlog
+        appData.repairs.forEach(r => {
+          if (r.id !== 'rep_pilas_microfonos') {
+            r.status = 'planificacion';
+            r.raisedAmount = 0;
+          } else {
+            r.status = 'compras';
+            r.raisedAmount = 5000;
+          }
+        });
+
         saveData();
         return;
       }
@@ -1567,6 +1579,37 @@ function renderRepairsGrid() {
             ${hasNotes ? `<span class="list-notes-badge" style="vertical-align: middle; font-size: 0.68rem; margin-left: 0.35rem;" title="Tiene bitácora técnica">📝 Bitácora</span>` : ''}
           </h3>
           ${repair.description ? `<p class="repair-description">${escapeHtml(repair.description)}</p>` : ''}
+        </div>
+
+        <!-- Prominent Goal Amount Box (Meta a Recaudar Claramente Visible) -->
+        <div class="card-meta-highlight-box">
+          <div class="meta-highlight-top">
+            <span class="meta-highlight-title-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+              ${repair.status === 'planificacion' ? 'Monto Estimado Proyecto' : 'Monto Meta a Recaudar'}
+            </span>
+            <span class="meta-highlight-status-badge">
+              ${repair.status === 'planificacion' ? 'En Backlog' : 'Campaña Activa'}
+            </span>
+          </div>
+          <div class="meta-highlight-amount">
+            ${formatCurrency(totalRepairCost)}
+            <span class="meta-highlight-amount-suffix">Meta Total</span>
+          </div>
+          <div class="meta-highlight-breakdown">
+            <div class="meta-breakdown-cell raised">
+              <span class="meta-breakdown-lbl">Recaudado</span>
+              <span class="meta-breakdown-val">${formatCurrency(raised)}</span>
+            </div>
+            <div class="meta-breakdown-cell remaining">
+              <span class="meta-breakdown-lbl">Por Recaudar</span>
+              <span class="meta-breakdown-val">${formatCurrency(remainingNeeded)}</span>
+            </div>
+            <div class="meta-breakdown-cell pct">
+              <span class="meta-breakdown-lbl">Avance Meta</span>
+              <span class="meta-breakdown-val">${fundingPct}%</span>
+            </div>
+          </div>
         </div>
 
         <!-- Parish Funding & Donation Progress Box -->
@@ -2932,9 +2975,39 @@ sortSelect.addEventListener('change', (e) => {
 });
 
 /* ==========================================================================
+   Theme Management (Light Mode Default)
+   ========================================================================== */
+function initTheme() {
+  const savedTheme = localStorage.getItem('parroquia_theme') || 'light';
+  applyTheme(savedTheme);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('parroquia_theme', theme);
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (icon && label) {
+    if (theme === 'dark') {
+      icon.textContent = '☀️';
+      label.textContent = 'Claro';
+    } else {
+      icon.textContent = '🌙';
+      label.textContent = 'Oscuro';
+    }
+  }
+}
+
+window.toggleTheme = function() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+};
+
+/* ==========================================================================
    Initialization
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   loadData();
   setupNotesStamping();
   // Ensure initial view button reflects current state
@@ -2946,3 +3019,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   updateUI();
 });
+
