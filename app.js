@@ -1604,55 +1604,45 @@ function renderRepairsGrid() {
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
           </div>
 
-          <!-- Prominent Goal Amount Box (Meta a Recaudar Claramente Visible) -->
-          <div class="card-meta-highlight-box">
-            <div class="meta-highlight-top">
-              <span class="meta-highlight-title-label">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                Monto Meta a Recaudar
-              </span>
-              <span class="meta-highlight-status-badge">Campaña Activa</span>
-            </div>
-            <div class="meta-highlight-amount">
-              ${formatCurrency(totalRepairCost)}
-              <span class="meta-highlight-amount-suffix">Meta Total Requerida</span>
-            </div>
-            <div class="meta-highlight-breakdown">
-              <div class="meta-breakdown-cell raised">
-                <span class="meta-breakdown-lbl">Recaudado</span>
-                <span class="meta-breakdown-val">${formatCurrency(raised)}</span>
+          <!-- Visualización en Paralelo: Recaudado vs Meta -->
+          <div class="parallel-funding-card">
+            <div class="parallel-stats-grid">
+              <!-- Columna 1: Lo que tenemos recaudado -->
+              <div class="parallel-stat-box recaudado">
+                <div class="parallel-stat-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <span>Recaudado Actual</span>
+                </div>
+                <div class="parallel-stat-amount">${formatCurrency(raised)}</div>
+                <div class="parallel-stat-sub">
+                  <span>✓ ${fundingPct}% de la meta</span>
+                </div>
               </div>
-              <div class="meta-breakdown-cell remaining">
-                <span class="meta-breakdown-lbl">Por Recaudar</span>
-                <span class="meta-breakdown-val">${formatCurrency(remainingNeeded)}</span>
-              </div>
-              <div class="meta-breakdown-cell pct">
-                <span class="meta-breakdown-lbl">Avance Meta</span>
-                <span class="meta-breakdown-val">${fundingPct}%</span>
-              </div>
-            </div>
-          </div>
 
-          <!-- Funding Progress Bar -->
-          <div class="card-funding-box">
-            <div class="funding-header">
-              <span class="funding-title">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                Avance de Recaudación Solidaria
-              </span>
-              <span class="funding-pct-badge ${fundingPct >= 100 ? 'funded' : 'in-progress'}">
-                ${fundingPct}% Financiado
-              </span>
+              <!-- Columna 2: La meta total -->
+              <div class="parallel-stat-box meta">
+                <div class="parallel-stat-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                  <span>Meta a Recaudar</span>
+                </div>
+                <div class="parallel-stat-amount">${formatCurrency(totalRepairCost)}</div>
+                <div class="parallel-stat-sub">
+                  <span>🎯 Costo total (12 packs)</span>
+                </div>
+              </div>
             </div>
 
-            <div class="funding-bar-track" title="${fundingPct}% recaudado">
-              <div class="funding-bar-fill ${fundingPct >= 100 ? 'is-100' : ''}" style="width: ${fundingPct}%;"></div>
-            </div>
-
-            <div class="funding-footer-stats">
-              <span>Aportado: <strong>${formatCurrency(raised)}</strong></span>
-              <span>Meta: <strong>${formatCurrency(totalRepairCost)}</strong></span>
-              <span class="remaining-text">Faltan ${formatCurrency(remainingNeeded)}</span>
+            <!-- Barra de Avance y Faltante conectando ambos -->
+            <div class="parallel-progress-section">
+              <div class="parallel-track" title="${fundingPct}% recaudado">
+                <div class="parallel-bar-fill" style="width: ${fundingPct}%;"></div>
+              </div>
+              <div class="parallel-progress-footer">
+                <span class="parallel-pct-text">Avance: <strong>${fundingPct}%</strong></span>
+                <span class="parallel-remaining-badge">
+                  ⏳ Faltan por recaudar: <strong>${formatCurrency(remainingNeeded)}</strong>
+                </span>
+              </div>
             </div>
           </div>
 
