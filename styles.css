@@ -4194,7 +4194,7 @@ body:not(.show-backlog-view) .repairs-grid {
 
 @media (min-width: 640px) {
   .funnel-reasons-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   }
 }
 

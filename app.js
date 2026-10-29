@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v7';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v8';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -426,12 +426,12 @@ const SAMPLE_DATA = [
   // ── PROYECTO ACTIVO ─────────────────────────────────────────────────────────
   {
     id: 'rep_pilas_microfonos',
-    place: 'Templo Mayor',
-    area: 'Sonido y Megafonía',
-    specialty: 'Audio y Megafonía',
+    place: 'Templo Mayor y Capilla de Adoración',
+    area: 'Sonido Litúrgico y Adoración Continua',
+    specialty: 'Audio y Velas Litúrgicas',
     status: 'compras',
-    title: 'Compra de Pilas Recargables AA Energizer para Micrófonos (Templo y Capilla)',
-    description: '[27/10/2026 23:45] ⏱️ Necesidad identificada: Los 6 micrófonos inalámbricos de la parroquia (4 en el Templo Mayor y 2 en la Capilla de Adoración Continua) funcionan con 2 pilas AA cada uno. Se requiere un set de reemplazo en rotación para que, mientras un juego de pilas está en uso, el otro se esté cargando.\n\n[27/10/2026 23:45] 📏 Cálculo de necesidad:\n• 4 micrófonos (Templo Mayor) + 2 micrófonos (Capilla) = 6 micrófonos\n• 6 micrófonos × 2 pilas AA = 12 pilas en uso simultáneo\n• Sistema de rotación (doble juego) = 12 × 2 = 24 pilas AA en total\n• Pack Energizer Recargables = 2 pilas → 24 ÷ 2 = 12 packs necesarios\n\n[27/10/2026 23:45] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). Alta capacidad y confiabilidad para uso litúrgico continuo. Verificar disponibilidad de cargador multi-bahía operativo antes de la compra.',
+    title: 'Compra de Pilas Recargables AA Energizer para Micrófonos y Velas de Adoración al Santísimo',
+    description: '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.',
     priority: 'alta',
     raisedAmount: 17200,
     hasLabor: false,
@@ -442,7 +442,7 @@ const SAMPLE_DATA = [
         id: 'itm_pilas_1',
         name: 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac',
         price: 6290,
-        qty: 12,
+        qty: 16,
         url: 'https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368',
         bought: false
       }
@@ -983,6 +983,14 @@ function loadData() {
           } else {
             r.status = 'compras';
             r.raisedAmount = 17200;
+            r.title = 'Compra de Pilas Recargables AA Energizer para Micrófonos y Velas de Adoración al Santísimo';
+            r.place = 'Templo Mayor y Capilla de Adoración';
+            r.area = 'Sonido Litúrgico y Adoración Continua';
+            r.specialty = 'Audio y Velas Litúrgicas';
+            r.description = '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.';
+            if (r.items && r.items[0]) {
+              r.items[0].qty = 16;
+            }
           }
         });
 
@@ -1382,7 +1390,7 @@ function renderRepairsGrid() {
       <div class="backlog-banner-body">
         <div class="backlog-banner-title">Banco de Proyectos Técnicos Parroquiales (Backlog / Por Realizar)</div>
         <div class="backlog-banner-desc">
-          Estas iniciativas técnicas e infraestructurales ya cuentan con su diagnóstico, cotizaciones y materiales especificados. Se encuentran en espera para focalizar los esfuerzos comunitarios en la compra activa de pilas recargables para micrófonos.
+          Estas iniciativas técnicas e infraestructurales ya cuentan con su diagnóstico, cotizaciones y materiales especificados. Se encuentran en espera para focalizar los esfuerzos comunitarios en la compra activa de pilas recargables para micrófonos y adoración continua.
         </div>
       </div>
     </div>
@@ -1569,9 +1577,9 @@ function renderRepairsGrid() {
           <span class="pulse-beacon"></span>
           <span>CAMPAÑA PARROQUIAL ACTIVA</span>
         </div>
-        <h2 class="active-campaign-title">Pilas Recargables para los Micrófonos</h2>
+        <h2 class="active-campaign-title">Pilas Recargables para Micrófonos y Adoración al Santísimo</h2>
         <p class="active-campaign-subtitle">
-          Iniciativa prioritaria para asegurar la transmisión y audio continuo en las misas de nuestra comunidad.
+          Iniciativa prioritaria para asegurar el audio en las misas y la iluminación continua de las velas en la Capilla de Adoración.
         </p>
       </div>
     `;
@@ -1617,7 +1625,7 @@ function renderRepairsGrid() {
           <div class="card-main-body">
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
             <p class="repair-lead-text">
-              Equipamiento con baterías recargables de alta duración para los 6 micrófonos inalámbricos parroquiales, evitando interrupciones durante las celebraciones.
+              Equipamiento con baterías recargables de alta duración para los micrófonos del Templo y Salón Capilla (6 en total), más las 2 velas eléctricas de la Capilla de Adoración Continua.
             </p>
           </div>
 
@@ -1644,7 +1652,7 @@ function renderRepairsGrid() {
                 </div>
                 <div class="parallel-stat-amount">${formatCurrency(totalRepairCost)}</div>
                 <div class="parallel-stat-sub">
-                  <span>🎯 Costo total (12 packs)</span>
+                  <span>🎯 Costo total (${totalQty} packs)</span>
                 </div>
               </div>
             </div>
@@ -1703,20 +1711,26 @@ function renderRepairsGrid() {
           <div class="funnel-step-panel ${activeStep === 'causa' ? 'active' : ''}" data-step="causa">
             <div class="funnel-panel-header">
               <h4>1. ¿Por qué necesitamos pilas recargables?</h4>
-              <p>Las misas y oraciones requieren una voz clara para el sacerdote, diáconos, lectores y coros parroquiales.</p>
+              <p>Para garantizar una voz clara en las celebraciones litúrgicas y mantener iluminadas con devoción y seguridad las velas de la Capilla de Adoración Continua.</p>
             </div>
 
             <div class="funnel-reasons-grid">
               <div class="funnel-reason-card">
                 <div class="reason-icon">🎙️</div>
                 <h5>Audio Continuo sin Cortes</h5>
-                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa y predecible en cada servicio.</p>
+                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa para los 6 micrófonos (Templo y Salón Capilla).</p>
+              </div>
+
+              <div class="funnel-reason-card">
+                <div class="reason-icon">🕯️</div>
+                <h5>Adoración Eucarística Continua</h5>
+                <p>Mantiene permanentemente iluminadas las 2 velas eléctricas ante el Santísimo Sacramento con rotación segura y sin interrupciones.</p>
               </div>
 
               <div class="funnel-reason-card">
                 <div class="reason-icon">💰</div>
                 <h5>Ahorro Parroquial Permanente</h5>
-                <p>Comprar pilas alcalinas semanalmente es un gasto innecesario. Con un solo aporte dotamos a la parroquia de energía para más de 1.000 recargas.</p>
+                <p>Comprar pilas alcalinas semanalmente es un gasto recurrente elevado. Con un solo aporte dotamos a la parroquia de energía para más de 1.000 recargas.</p>
               </div>
 
               <div class="funnel-reason-card">
@@ -1728,7 +1742,7 @@ function renderRepairsGrid() {
 
             <div class="funnel-panel-actions">
               <button type="button" class="btn-funnel-next" onclick="setFunnelStep('presupuesto')">
-                Siguiente: Ver cómo se calculó la meta ($75.480) →
+                Siguiente: Ver cómo se calculó la meta (${formatCurrency(totalRepairCost)}) →
               </button>
             </div>
           </div>
@@ -1736,7 +1750,7 @@ function renderRepairsGrid() {
           <!-- Panel 2: Presupuesto y Cotización Técnica -->
           <div class="funnel-step-panel ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto">
             <div class="funnel-panel-header">
-              <h4>2. Cálculo Técnico Transparente de la Meta ($75.480)</h4>
+              <h4>2. Cálculo Técnico Transparente de la Meta (${formatCurrency(totalRepairCost)})</h4>
               <p>Así definimos el presupuesto exacto sin costos ocultos:</p>
             </div>
 
@@ -1744,19 +1758,27 @@ function renderRepairsGrid() {
               <ul class="tech-calc-list">
                 <li>
                   <span>🎙️</span>
-                  <span><strong>6 micrófonos activos:</strong> 4 en el Templo Mayor y 2 en la Capilla de Adoración Continua.</span>
+                  <span><strong>4 micrófonos en el Templo Mayor:</strong> 4 × 2 pilas AA = <strong>8 pilas AA</strong>.</span>
+                </li>
+                <li>
+                  <span>🎙️</span>
+                  <span><strong>2 micrófonos en el Salón Capilla:</strong> 2 × 2 pilas AA = <strong>4 pilas AA</strong>.</span>
+                </li>
+                <li>
+                  <span>🕯️</span>
+                  <span><strong>2 velas eléctricas (Adoración al Santísimo):</strong> 2 × 2 pilas AA = <strong>4 pilas AA</strong>.</span>
                 </li>
                 <li>
                   <span>🔋</span>
-                  <span><strong>2 pilas AA por micrófono:</strong> 6 × 2 = <strong>12 pilas AA</strong> operando de manera simultánea.</span>
+                  <span><strong>Total en uso simultáneo continuo:</strong> 8 + 4 + 4 = <strong>16 pilas AA</strong> en operación activa.</span>
                 </li>
                 <li>
                   <span>🔄</span>
-                  <span><strong>Rotación continua (2 juegos):</strong> Se requiere el doble (12 × 2 = <strong>24 pilas</strong>) para que mientras un juego está en uso en el altar, el juego de relevo se recargue en sacristía.</span>
+                  <span><strong>Rotación continua (2 juegos):</strong> Se requiere el doble (16 × 2 = <strong>32 pilas AA</strong>) para que mientras un juego está en uso, el de relevo se recargue en sacristía.</span>
                 </li>
                 <li>
                   <span>📦</span>
-                  <span><strong>12 packs de 2 pilas Energizer Recargables AA (2000 mAh):</strong> A $6.290 cada pack en Sodimac = <strong>$75.480 total</strong>.</span>
+                  <span><strong>16 packs de 2 pilas Energizer Recargables AA (2000 mAh):</strong> A $6.290 cada pack en Sodimac = <strong>${formatCurrency(totalRepairCost)} total</strong>.</span>
                 </li>
               </ul>
             </div>
@@ -1767,7 +1789,7 @@ function renderRepairsGrid() {
                 <div class="product-sodimac-icon">🔋</div>
                 <div class="product-sodimac-text">
                   <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V</span>
-                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • 12 packs requeridos ($75.480)</span>
+                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • ${totalQty} packs requeridos (${formatCurrency(totalRepairCost)})</span>
                 </div>
               </div>
               <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
@@ -1884,7 +1906,7 @@ function renderRepairsGrid() {
   let html = `
     <div class="backlog-return-bar">
       <button type="button" class="btn-return-active" onclick="switchProjectSection('active')">
-        ← Volver al Proyecto Activo (Pilas Micrófonos)
+        ← Volver al Proyecto Activo (Pilas Micrófonos y Adoración)
       </button>
     </div>
     ${backlogBannerHtml}
