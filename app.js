@@ -433,7 +433,7 @@ const SAMPLE_DATA = [
     title: 'Compra de Pilas Recargables AA Energizer para Micrófonos (Templo y Capilla)',
     description: '[27/10/2026 23:45] ⏱️ Necesidad identificada: Los 6 micrófonos inalámbricos de la parroquia (4 en el Templo Mayor y 2 en la Capilla de Adoración Continua) funcionan con 2 pilas AA cada uno. Se requiere un set de reemplazo en rotación para que, mientras un juego de pilas está en uso, el otro se esté cargando.\n\n[27/10/2026 23:45] 📏 Cálculo de necesidad:\n• 4 micrófonos (Templo Mayor) + 2 micrófonos (Capilla) = 6 micrófonos\n• 6 micrófonos × 2 pilas AA = 12 pilas en uso simultáneo\n• Sistema de rotación (doble juego) = 12 × 2 = 24 pilas AA en total\n• Pack Energizer Recargables = 2 pilas → 24 ÷ 2 = 12 packs necesarios\n\n[27/10/2026 23:45] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). Alta capacidad y confiabilidad para uso litúrgico continuo. Verificar disponibilidad de cargador multi-bahía operativo antes de la compra.',
     priority: 'alta',
-    raisedAmount: 5000,
+    raisedAmount: 17200,
     hasLabor: false,
     laborCost: 0,
     createdAt: Date.now() + 9000,
@@ -982,7 +982,7 @@ function loadData() {
             r.raisedAmount = 0;
           } else {
             r.status = 'compras';
-            r.raisedAmount = 5000;
+            r.raisedAmount = 17200;
           }
         });
 
