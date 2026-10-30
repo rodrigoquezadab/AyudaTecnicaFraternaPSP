@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v10';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v11';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -1815,52 +1815,74 @@ function renderRepairsGrid() {
               <p>Tu donación, cualquiera sea el monto, va 100% destinada a esta adquisición técnica.</p>
             </div>
 
-            <!-- Embedded Instant Bank Transfer Card -->
+            <!-- Embedded Instant Bank Transfer Card with Mercado Pago & QR -->
             <div class="instant-bank-card">
               <div class="instant-bank-header">
-                <span>🏦 Datos Oficiales para Transferencia Bancaria</span>
-                <span style="font-size:0.75rem; font-weight:normal; color:var(--text-subtle);">Banco Santander Chile</span>
+                <span>🏦 Datos para Transferencia Bancaria Directa</span>
+                <span class="mercadopago-pill">MERCADO PAGO</span>
               </div>
 
-              <div class="instant-bank-grid">
-                <div class="instant-bank-row">
-                  <div>
-                    <span class="instant-bank-lbl">Cuenta Corriente</span>
-                    <span class="instant-bank-val">73235740</span>
+              <div class="instant-bank-layout">
+                <div class="instant-bank-grid">
+                  <div class="instant-bank-row">
+                    <div>
+                      <span class="instant-bank-lbl">Banco Destino</span>
+                      <span class="instant-bank-val">MERCADO PAGO</span>
+                    </div>
+                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('MERCADO PAGO', this)">
+                      📋 Copiar
+                    </button>
                   </div>
-                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('73235740', this)">
-                    📋 Copiar
-                  </button>
+
+                  <div class="instant-bank-row">
+                    <div>
+                      <span class="instant-bank-lbl">Cuenta Vista</span>
+                      <span class="instant-bank-val">1011953574</span>
+                    </div>
+                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('1011953574', this)">
+                      📋 Copiar
+                    </button>
+                  </div>
+
+                  <div class="instant-bank-row">
+                    <div>
+                      <span class="instant-bank-lbl">RUT</span>
+                      <span class="instant-bank-val">14.148.009-k</span>
+                    </div>
+                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('14148009k', this)">
+                      📋 Copiar
+                    </button>
+                  </div>
+
+                  <div class="instant-bank-row">
+                    <div>
+                      <span class="instant-bank-lbl">Correo Electrónico</span>
+                      <span class="instant-bank-val" style="font-size:0.75rem;">rodrigo.quezadab@gmail.com</span>
+                    </div>
+                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('rodrigo.quezadab@gmail.com', this)">
+                      📋 Copiar
+                    </button>
+                  </div>
+
+                  <div class="instant-bank-row" style="grid-column: 1 / -1; border-left: 3px solid #009ee3;">
+                    <div>
+                      <span class="instant-bank-lbl">Asunto / Glosa de Transferencia</span>
+                      <span class="instant-bank-val" style="color: #0284c7; font-weight: 700;">Parroquia</span>
+                    </div>
+                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia', this)">
+                      📋 Copiar Glosa
+                    </button>
+                  </div>
                 </div>
 
-                <div class="instant-bank-row">
-                  <div>
-                    <span class="instant-bank-lbl">RUT Parroquia</span>
-                    <span class="instant-bank-val">82.566.800-4</span>
+                <!-- QR Code Box -->
+                <div class="instant-bank-qr-box">
+                  <div class="instant-qr-wrapper">
+                    <img src="assets/qr-mercadopago.svg" alt="QR Mercado Pago Donaciones" width="120" height="120" class="instant-qr-img">
                   </div>
-                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('825668004', this)">
-                    📋 Copiar
-                  </button>
-                </div>
-
-                <div class="instant-bank-row">
-                  <div>
-                    <span class="instant-bank-lbl">Titular</span>
-                    <span class="instant-bank-val">Parroquia San Patricio</span>
+                  <div class="instant-qr-caption">
+                    <span>📱 Escanea para transferir con <strong>Mercado Pago</strong> o tu App de Banco</span>
                   </div>
-                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia San Patricio', this)">
-                    📋 Copiar
-                  </button>
-                </div>
-
-                <div class="instant-bank-row">
-                  <div>
-                    <span class="instant-bank-lbl">Correo Comprobante</span>
-                    <span class="instant-bank-val" style="font-size:0.75rem;">secreparroquiasanpatricio@gmail.com</span>
-                  </div>
-                  <button type="button" class="btn-instant-copy" onclick="copyDonationField('secreparroquiasanpatricio@gmail.com', this)">
-                    📋 Copiar
-                  </button>
                 </div>
               </div>
             </div>
@@ -2568,10 +2590,10 @@ window.openDonationModal = function(projectId = null) {
       if (targetGoal) targetGoal.textContent = formatCurrency(total);
       if (targetRaised) targetRaised.textContent = formatCurrency(raised);
       if (targetNeeded) targetNeeded.textContent = formatCurrency(needed);
-      if (copySubject) copySubject.textContent = `Donación Proyecto: ${repair.title.slice(0, 30)}`;
+      if (copySubject) copySubject.textContent = 'Parroquia';
 
       if (waBtn) {
-        const text = encodeURIComponent(`Hola Parroquia San Patricio, deseo realizar una donación para el proyecto técnico: "${repair.title}". Les enviaré el comprobante de transferencia a Banco Santander. ¡Muchas gracias!`);
+        const text = encodeURIComponent(`Hola Parroquia San Patricio, deseo realizar una donación para el proyecto técnico: "${repair.title}". Les enviaré el comprobante de transferencia a Mercado Pago. ¡Muchas gracias!`);
         waBtn.href = `https://wa.me/56933484878?text=${text}`;
       }
     }

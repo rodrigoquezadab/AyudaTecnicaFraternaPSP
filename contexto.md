@@ -70,15 +70,15 @@ Esta plataforma tiene como meta **profesionalizar, transparentar y dinamizar la 
 
 Los aportes a proyectos técnicos y el sostenimiento parroquial se gestionan a través de la cuenta corriente oficial de la Parroquia:
 
-| Campo Bancario | Información Oficial |
+| Campo | Información Oficial para Donaciones Técnicas |
 | :--- | :--- |
-| **Banco** | **Banco Santander** |
-| **Tipo de Cuenta** | **Cuenta Corriente** |
-| **Número de Cuenta** | **73235740** |
-| **Titular** | **Parroquia San Patricio** |
-| **RUT** | **82.566.800-4** |
-| **Correo de Notificación / Comprobante** | **secreparroquiasanpatricio@gmail.com** |
-| **Asunto / Glosa Importante** | Indicar el nombre del proyecto técnico (ej. *"Donación Focos LED Pasillo"*, *"Donación Micrófono Templo"*) |
+| **Plataforma / Banco** | **MERCADO PAGO** |
+| **Tipo de Cuenta** | **Cuenta Vista** |
+| **Número de Cuenta** | **1011953574** |
+| **RUT** | **14.148.009-k** (copiable: `14148009k`) |
+| **Correo de Notificación / Transferencia** | **rodrigo.quezadab@gmail.com** |
+| **Asunto / Glosa de Transferencia** | **Parroquia** |
+| **Código QR Integrado** | Disponible en la plataforma web (`assets/qr-mercadopago.svg`) para escaneo desde app móvil |
 
 > [!NOTE]
 > La parroquia también promueve activamente el **1% CALI (Contribución a la Iglesia)**, mediante mandato PAC, PAT o transferencia regular para la mantención del culto, sacerdotes y auxilio a parroquias más vulnerables de Santiago.

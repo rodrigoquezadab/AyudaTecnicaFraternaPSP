@@ -561,32 +561,31 @@
         </div>
 
         <div style="font-size: 0.88rem; color: var(--text-main); line-height: 1.45;">
-          Para apoyar este u otros proyectos técnicos, realiza tu transferencia bancaria a la <strong>cuenta corriente
-            oficial de la Parroquia San Patricio</strong>:
+          Para apoyar este proyecto técnico parroquial, puedes realizar tu transferencia bancaria directa o escanear el código QR con <strong>Mercado Pago</strong> o tu aplicación bancaria:
         </div>
 
         <!-- Bank Details with Instant 1-Click Copy -->
         <div class="donation-bank-list">
           <div class="donation-bank-item">
             <div class="bank-item-info">
-              <span class="bank-item-label">Banco</span>
-              <span class="bank-item-val" id="copy-bank">Banco Santander</span>
+              <span class="bank-item-label">Banco Destino</span>
+              <span class="bank-item-val" id="copy-bank">MERCADO PAGO</span>
             </div>
-            <button type="button" class="donation-copy-btn" onclick="copyDonationField('Banco Santander', this)">
+            <button type="button" class="donation-copy-btn" onclick="copyDonationField('MERCADO PAGO', this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
-              <span>Copiar</span>
+              <span>Copiar Banco</span>
             </button>
           </div>
 
           <div class="donation-bank-item">
             <div class="bank-item-info">
               <span class="bank-item-label">Tipo y Número de Cuenta</span>
-              <span class="bank-item-val" id="copy-account">Cuenta Corriente 73235740</span>
+              <span class="bank-item-val" id="copy-account">Cuenta Vista 1011953574</span>
             </div>
-            <button type="button" class="donation-copy-btn" onclick="copyDonationField('73235740', this)">
+            <button type="button" class="donation-copy-btn" onclick="copyDonationField('1011953574', this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -597,24 +596,10 @@
 
           <div class="donation-bank-item">
             <div class="bank-item-info">
-              <span class="bank-item-label">Titular de la Cuenta</span>
-              <span class="bank-item-val" id="copy-name">Parroquia San Patricio</span>
+              <span class="bank-item-label">RUT</span>
+              <span class="bank-item-val" id="copy-rut">14.148.009-k</span>
             </div>
-            <button type="button" class="donation-copy-btn" onclick="copyDonationField('Parroquia San Patricio', this)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <span>Copiar Nombre</span>
-            </button>
-          </div>
-
-          <div class="donation-bank-item">
-            <div class="bank-item-info">
-              <span class="bank-item-label">RUT Institucional</span>
-              <span class="bank-item-val" id="copy-rut">82.566.800-4</span>
-            </div>
-            <button type="button" class="donation-copy-btn" onclick="copyDonationField('825668004', this)">
+            <button type="button" class="donation-copy-btn" onclick="copyDonationField('14148009k', this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -625,11 +610,11 @@
 
           <div class="donation-bank-item">
             <div class="bank-item-info">
-              <span class="bank-item-label">Correo para Comprobante</span>
-              <span class="bank-item-val" id="copy-email">secreparroquiasanpatricio@gmail.com</span>
+              <span class="bank-item-label">Correo para Transferencia / Comprobante</span>
+              <span class="bank-item-val" id="copy-email">rodrigo.quezadab@gmail.com</span>
             </div>
             <button type="button" class="donation-copy-btn"
-              onclick="copyDonationField('secreparroquiasanpatricio@gmail.com', this)">
+              onclick="copyDonationField('rodrigo.quezadab@gmail.com', this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -638,17 +623,36 @@
             </button>
           </div>
 
-          <div class="donation-bank-item" style="border-left: 3px solid #facc15;">
+          <div class="donation-bank-item" style="border-left: 3px solid #009ee3;">
             <div class="bank-item-info">
-              <span class="bank-item-label">Asunto / Glosa Sugerida</span>
-              <span class="bank-item-val" id="copy-subject" style="color: #facc15;">Donación Proyecto Parroquia</span>
+              <span class="bank-item-label">Asunto / Glosa de Transferencia</span>
+              <span class="bank-item-val" id="copy-subject" style="color: #0284c7; font-weight: 700;">Parroquia</span>
             </div>
-            <button type="button" class="donation-copy-btn" onclick="copyDonationSubject(this)">
+            <button type="button" class="donation-copy-btn" onclick="copyDonationField('Parroquia', this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
               <span>Copiar Glosa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mercado Pago QR Code Box in Modal -->
+        <div class="donation-qr-box">
+          <div class="donation-qr-img-wrapper">
+            <img src="assets/qr-mercadopago.svg" alt="Código QR Transferencia Mercado Pago" width="140" height="140" class="donation-qr-img">
+          </div>
+          <div class="donation-qr-text-side">
+            <div class="donation-qr-title">
+              <span class="mp-badge">MERCADO PAGO</span>
+              <span>Escanear QR para Transferir</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0.35rem 0 0.65rem 0; line-height: 1.4;">
+              Usa la cámara de tu celular o la app de <strong>Mercado Pago</strong> para escanear y transferir con los datos precargados.
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyDonationField('Banco: MERCADO PAGO | Cuenta Vista: 1011953574 | RUT: 14148009k | Email: rodrigo.quezadab@gmail.com | Asunto: Parroquia', this)">
+              📋 Copiar Ficha Completa de Transferencia
             </button>
           </div>
         </div>

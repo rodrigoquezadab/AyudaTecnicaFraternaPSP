@@ -4299,3 +4299,146 @@ body:not(.show-backlog-view) .repairs-grid {
 
 
 
+
+/* ==========================================================================
+   Mercado Pago & Donation QR Code System
+   ========================================================================== */
+.mercadopago-pill {
+  background: rgba(0, 158, 227, 0.12);
+  color: #0284c7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(0, 158, 227, 0.35);
+  letter-spacing: 0.04em;
+}
+
+[data-theme="dark"] .mercadopago-pill {
+  background: rgba(0, 158, 227, 0.25);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.instant-bank-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .instant-bank-layout {
+    grid-template-columns: 1fr auto;
+    gap: 1.25rem;
+  }
+}
+
+.instant-bank-qr-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .instant-bank-qr-box {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.instant-qr-wrapper {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  display: inline-flex;
+}
+
+.instant-qr-img {
+  width: 120px;
+  height: 120px;
+  display: block;
+}
+
+.instant-qr-caption {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  max-width: 150px;
+  line-height: 1.35;
+}
+
+.donation-qr-box {
+  background: linear-gradient(135deg, rgba(0, 158, 227, 0.08) 0%, rgba(2, 132, 199, 0.03) 100%);
+  border: 1.5px dashed rgba(0, 158, 227, 0.45);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 580px) {
+  .donation-qr-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.donation-qr-img-wrapper {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.donation-qr-img {
+  width: 135px;
+  height: 135px;
+  display: block;
+}
+
+.donation-qr-text-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.donation-qr-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 580px) {
+  .donation-qr-title {
+    justify-content: center;
+  }
+}
+
+.mp-badge {
+  background: #009ee3;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 6px rgba(0, 158, 227, 0.35);
+}
