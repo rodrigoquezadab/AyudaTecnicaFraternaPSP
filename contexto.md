@@ -95,9 +95,11 @@ La plataforma clasifica las iniciativas en áreas especializadas:
    - Renovación de iluminación en Comedor Parroquial mediante 10 paneles LED redondos sobrepuestos de 20W luz fría.
    - Normalización de tableros eléctricos, puesta a tierra e iluminación de emergencia en salidas de escape.
 2. **🎙️ Audio y Megafonía Litúrgica:**
-   - Mantención y recambio de cápsulas de micrófonos para el altar, ambón y coro.
+   - **4 Micrófonos Inalámbricos del Templo Mayor:** Modelo SKP PRO AUDIO UHF 600 PRO en rack de sacristía. Requieren 2 pilas AA c/u más su juego de recarga de relevo continuo (16 pilas AA / 8 packs). **(Prioridad Actual - Fase 1)**.
+   - **2 Micrófonos Inalámbricos de la Capilla:** Requieren 2 pilas AA c/u más su juego de recarga (8 pilas AA / 4 packs). **(Fase 2)**.
+   - **2 Velas Eléctricas de la Capilla de Adoración Continua:** Ante el Santísimo Sacramento, 2 pilas AA c/u más relevo continuo (8 pilas AA / 4 packs). **(Fase 3)**.
+   - **Total Consolidado de Infraestructura:** 8 aparatos litúrgicos × 2 pilas = 16 en uso simultáneo × 2 (el doble para recarga) = **32 pilas AA en total (16 packs)**.
    - Sistemas de supresión de acoples (feedback), cableado balanceado XLR libre de ruido e interferencias.
-   - Sonorización perimetral del Templo Menor y Capilla de Adoración.
 3. **📹 Video, Proyección y Streaming:**
    - Equipamiento para transmisión continua en vivo de misas por YouTube y redes sociales.
    - Proyector de alta luminosidad y telón motorizado en la Casa de la Sagrada Familia para retiros y catequesis.

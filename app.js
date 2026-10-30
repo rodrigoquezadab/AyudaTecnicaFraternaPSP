@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v14';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v15';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -1674,6 +1674,95 @@ function renderRepairsGrid() {
             <p class="repair-lead-text">
               En el proyecto son <strong>4 micrófonos para el Templo, 2 para la Capilla y 2 velas para la Adoración al Santísimo Sacramento</strong>. Cada aparato utiliza <strong>2 pilas cada uno</strong> y debemos tener <strong>el doble de pilas para tener siempre unas en uso y otras en carga</strong> (32 pilas en total). La <strong>prioridad actual y meta a cumplir</strong> son las <strong>16 pilas para los 4 micrófonos del Templo</strong>.
             </p>
+
+            <!-- Galería de Equipamiento Real: Micrófonos de la Parroquia -->
+            <div class="infra-gallery-grid">
+              <div class="infra-photo-card">
+                <div class="infra-photo-img-wrapper">
+                  <span class="infra-photo-badge active-badge">
+                    <span class="pulse-beacon" style="width:7px; height:7px;"></span>
+                    <span>Templo Mayor • 4 Micrófonos</span>
+                  </span>
+                  <img src="assets/microfonos_templo_rack.jpg" alt="Rack con 4 micrófonos del Templo Mayor" class="infra-photo-img">
+                </div>
+                <div class="infra-photo-info">
+                  <h4 class="infra-photo-title">Soporte Sacristía: 4 Micrófonos Templo</h4>
+                  <p class="infra-photo-caption">
+                    Equipamiento litúrgico en rack del Templo Mayor. Requieren <strong>16 pilas AA (8 packs)</strong>: 8 pilas operando en presbiterio y 8 en relevo de recarga continua en sacristía. <strong>(Fase 1 - Prioridad Actual)</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div class="infra-photo-card">
+                <div class="infra-photo-img-wrapper">
+                  <span class="infra-photo-badge">
+                    <span>🎙️ Modelo Técnico: SKP UHF 600 PRO</span>
+                  </span>
+                  <img src="assets/microfono_skp_uhf600.jpg" alt="Detalle micrófono SKP UHF 600 PRO" class="infra-photo-img">
+                </div>
+                <div class="infra-photo-info">
+                  <h4 class="infra-photo-title">Detalle: Micrófono Inalámbrico SKP</h4>
+                  <p class="infra-photo-caption">
+                    Modelo <strong>SKP PRO AUDIO UHF 600 PRO</strong> con display LCD. Cada micrófono funciona con <strong>2 pilas AA</strong> de 2000 mAh para transmisión continua sin caídas de señal en cada servicio.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Requerimientos Claros de Infraestructura Parroquial -->
+            <div class="infra-requirements-box">
+              <div class="infra-req-header">
+                <h4 class="infra-req-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+                  <span>Requerimientos de Infraestructura: 8 Aparatos Parroquiales</span>
+                </h4>
+                <span style="font-size:0.75rem; font-weight:700; color:#15803d; background:#f0fdf4; padding:0.18rem 0.5rem; border-radius:var(--radius-full); border:1px solid #86efac;">
+                  2 Pilas por Aparato + Doble en Recarga
+                </span>
+              </div>
+
+              <!-- Requerimiento 1: Templo -->
+              <div class="infra-req-item">
+                <div class="infra-req-icon">🎙️</div>
+                <div class="infra-req-body">
+                  <div class="infra-req-heading">
+                    <span class="infra-req-name">1. Templo Mayor: 4 Micrófonos Inalámbricos</span>
+                    <span class="infra-req-status active">🟢 PRIORIDAD ACTUAL (FASE 1)</span>
+                  </div>
+                  <p class="infra-req-details">
+                    Para altar, presbiterio, ambón y celebraciones comunitarias. 4 micrófonos × 2 pilas = <strong>8 pilas en uso</strong> + 8 pilas en carga continua = <span class="infra-req-math">16 pilas AA en total (8 packs) • Meta: $50.320</span>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Requerimiento 2: Capilla -->
+              <div class="infra-req-item">
+                <div class="infra-req-icon">🎙️</div>
+                <div class="infra-req-body">
+                  <div class="infra-req-heading">
+                    <span class="infra-req-name">2. Salón Capilla: 2 Micrófonos Inalámbricos</span>
+                    <span class="infra-req-status pending">⏳ PRÓXIMO HITO (FASE 2)</span>
+                  </div>
+                  <p class="infra-req-details">
+                    Para liturgias diarias y actividades en el Salón Capilla. 2 micrófonos × 2 pilas = <strong>4 pilas en uso</strong> + 4 pilas en carga continua = <span class="infra-req-math">8 pilas AA en total (4 packs) • Meta: $25.160</span>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Requerimiento 3: Adoración al Santísimo -->
+              <div class="infra-req-item">
+                <div class="infra-req-icon">🕯️</div>
+                <div class="infra-req-body">
+                  <div class="infra-req-heading">
+                    <span class="infra-req-name">3. Adoración al Santísimo: 2 Velas Eléctricas</span>
+                    <span class="infra-req-status pending">⏳ HITO FINAL (FASE 3)</span>
+                  </div>
+                  <p class="infra-req-details">
+                    Para la Capilla de Adoración Continua del Santísimo Sacramento (12 horas diarias). 2 velas × 2 pilas = <strong>4 pilas en uso</strong> + 4 pilas en carga continua = <span class="infra-req-math">8 pilas AA en total (4 packs) • Meta: $25.160</span>.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Desglose de Fases e Hitos del Proyecto Pilas -->
@@ -1893,8 +1982,8 @@ function renderRepairsGrid() {
             <div class="funnel-reasons-grid">
               <div class="funnel-reason-card">
                 <div class="reason-icon">🎙️</div>
-                <h5>Audio Continuo sin Cortes</h5>
-                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa para los 6 micrófonos (Templo y Salón Capilla).</p>
+                <h5>Audio Continuo en Micrófonos SKP UHF</h5>
+                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa para los 4 micrófonos SKP UHF 600 PRO del Templo y los 2 de la Capilla.</p>
               </div>
 
               <div class="funnel-reason-card">
