@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v12';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v13';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -445,7 +445,7 @@ const SAMPLE_DATA = [
     specialty: 'Audio y Velas Litúrgicas',
     status: 'compras',
     title: 'Compra de 32 Pilas Recargables AA Energizer (16 Packs) para Micrófonos y Velas de Adoración',
-    description: '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.',
+    description: '[30/10/2026 02:45] 🎯 Proyecto Estructurado en 3 Fases con Prioridad Inmediata en Fase 1:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas operando + 8 en relevo/recarga = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de cumplimiento).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos del Salón Capilla (4 en uso + 4 en relevo). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas eléctricas de Adoración Continua al Santísimo (4 en uso + 4 en relevo). Meta: $25.160.\n• META GLOBAL CONSOLIDADA: 32 pilas AA (16 packs) = $100.640.',
     priority: 'alta',
     raisedAmount: 29000,
     hasLabor: false,
@@ -1033,7 +1033,7 @@ function loadData() {
             r.place = 'Templo Mayor y Capilla de Adoración';
             r.area = 'Sonido Litúrgico y Adoración Continua';
             r.specialty = 'Audio y Velas Litúrgicas';
-            r.description = '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.';
+            r.description = '[30/10/2026 02:45] 🎯 Proyecto Estructurado en 3 Fases con Prioridad Inmediata en Fase 1:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas operando + 8 en relevo/recarga = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de cumplimiento).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos del Salón Capilla (4 en uso + 4 en relevo). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas eléctricas de Adoración Continua al Santísimo (4 en uso + 4 en relevo). Meta: $25.160.\n• META GLOBAL CONSOLIDADA: 32 pilas AA (16 packs) = $100.640.';
             if (r.items && r.items[0]) {
               r.items[0].name = 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac (16 packs = 32 pilas AA)';
               r.items[0].qty = 16;
@@ -1624,9 +1624,9 @@ function renderRepairsGrid() {
           <span class="pulse-beacon"></span>
           <span>CAMPAÑA PARROQUIAL ACTIVA</span>
         </div>
-        <h2 class="active-campaign-title">32 Pilas Recargables AA para Micrófonos y Adoración al Santísimo</h2>
+        <h2 class="active-campaign-title">Pilas Recargables AA (3 Fases) • Prioridad: Templo Mayor</h2>
         <p class="active-campaign-subtitle">
-          Campaña prioritaria para proveer <strong>32 pilas AA recargables (16 packs de 2 unidades)</strong>: audio continuo en las misas e iluminación permanente de las velas de Adoración al Santísimo.
+          <strong>Meta Prioritaria Actual (Fase 1):</strong> 16 pilas AA (8 packs) para los 4 micrófonos del Templo Mayor. Se requiere el doble para contar con un juego en uso y otro cargando en sacristía.
         </p>
       </div>
     `;
@@ -1672,51 +1672,162 @@ function renderRepairsGrid() {
           <div class="card-main-body">
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
             <p class="repair-lead-text">
-              Meta total: <strong>32 pilas AA recargables (16 packs de 2 pilas)</strong>. Permite rotación permanente (un juego en uso y otro cargando) para los 6 micrófonos inalámbricos y las 2 velas eléctricas de la Capilla de Adoración Continua.
+              Proyecto organizado en <strong>3 Fases</strong>. La <strong>prioridad actual y meta a cumplir</strong> son las <strong>16 pilas AA (8 packs)</strong> para los 4 micrófonos del Templo Mayor (2 pilas en cada micrófono más su doble de reemplazo en recarga continua).
             </p>
           </div>
 
-          <!-- Visualización en Paralelo: Recaudado vs Meta -->
-          <div class="parallel-funding-card">
-            <div class="parallel-stats-grid">
-              <!-- Columna 1: Lo que tenemos recaudado -->
-              <div class="parallel-stat-box recaudado">
-                <div class="parallel-stat-header">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  <span>Recaudado Actual</span>
+          <!-- Desglose de Fases e Hitos del Proyecto Pilas -->
+          ${(() => {
+            const p1Packs = 8;
+            const p1Cost = p1Packs * 6290; // $50.320
+            const p1Raised = Math.min(raised, p1Cost); // $29.000
+            const p1Pct = p1Cost > 0 ? Math.min(100, Math.round((p1Raised / p1Cost) * 100)) : 0;
+            const p1Remaining = Math.max(0, p1Cost - p1Raised); // $21.320
+
+            const p2Packs = 4;
+            const p2Cost = p2Packs * 6290; // $25.160
+            const p2Raised = Math.max(0, Math.min(raised - p1Cost, p2Cost));
+            const p2Pct = p2Cost > 0 ? Math.min(100, Math.round((p2Raised / p2Cost) * 100)) : 0;
+
+            const p3Packs = 4;
+            const p3Cost = p3Packs * 6290; // $25.160
+            const p3Raised = Math.max(0, Math.min(raised - p1Cost - p2Cost, p3Cost));
+            const p3Pct = p3Cost > 0 ? Math.min(100, Math.round((p3Raised / p3Cost) * 100)) : 0;
+
+            return `
+              <!-- Visualización en Paralelo: Foco en la Meta Prioritaria Actual (Fase 1) -->
+              <div class="parallel-funding-card">
+                <div class="parallel-priority-kicker">
+                  <span class="priority-pulse-dot"></span>
+                  <span>PRIORIDAD ACTUAL: 16 PILAS TEMPLO MAYOR (4 MICRÓFONOS EN ROTACIÓN)</span>
                 </div>
-                <div class="parallel-stat-amount">${formatCurrency(raised)}</div>
-                <div class="parallel-stat-sub">
-                  <span>✓ ${fundingPct}% de la meta</span>
+
+                <div class="parallel-stats-grid">
+                  <!-- Columna 1: Lo que tenemos recaudado -->
+                  <div class="parallel-stat-box recaudado">
+                    <div class="parallel-stat-header">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                      <span>Recaudado Actual</span>
+                    </div>
+                    <div class="parallel-stat-amount">${formatCurrency(raised)}</div>
+                    <div class="parallel-stat-sub">
+                      <span>✓ <strong>${p1Pct}% cumplido</strong> de la Fase 1 (${fundingPct}% global)</span>
+                    </div>
+                  </div>
+
+                  <!-- Columna 2: La meta de Fase 1 -->
+                  <div class="parallel-stat-box meta">
+                    <div class="parallel-stat-header">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                      <span>Meta Prioridad (Fase 1)</span>
+                    </div>
+                    <div class="parallel-stat-amount">${formatCurrency(p1Cost)}</div>
+                    <div class="parallel-stat-sub">
+                      <span>🎯 8 packs = 16 pilas AA (Templo)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Barra de Avance y Faltante conectando ambos -->
+                <div class="parallel-progress-section">
+                  <div class="parallel-track" title="${p1Pct}% recaudado de la Fase 1">
+                    <div class="parallel-bar-fill" style="width: ${p1Pct}%;"></div>
+                  </div>
+                  <div class="parallel-progress-footer">
+                    <span class="parallel-pct-text">Cumplimiento Fase 1: <strong>${p1Pct}%</strong></span>
+                    <span class="parallel-remaining-badge">
+                      ⏳ Faltan para cumplir Fase 1: <strong>${formatCurrency(p1Remaining)}</strong>
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Columna 2: La meta total -->
-              <div class="parallel-stat-box meta">
-                <div class="parallel-stat-header">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                  <span>Meta a Recaudar</span>
+              <!-- Tablero de las 3 Fases del Proyecto con Cumplimiento de Hitos -->
+              <div class="phase-milestones-card">
+                <div class="phase-milestones-header">
+                  <h4 class="phase-milestones-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                    <span>Cumplimiento y Metas por Hitos (3 Fases)</span>
+                  </h4>
+                  <span class="phase-milestones-badge">32 Pilas AA en Rotación Continua</span>
                 </div>
-                <div class="parallel-stat-amount">${formatCurrency(totalRepairCost)}</div>
-                <div class="parallel-stat-sub">
-                  <span>🎯 Meta: ${totalQty} packs = 32 pilas AA</span>
-                </div>
-              </div>
-            </div>
 
-            <!-- Barra de Avance y Faltante conectando ambos -->
-            <div class="parallel-progress-section">
-              <div class="parallel-track" title="${fundingPct}% recaudado">
-                <div class="parallel-bar-fill" style="width: ${fundingPct}%;"></div>
+                <div class="phase-milestones-grid">
+                  <!-- Hito 1: Templo Mayor (Prioridad Actual) -->
+                  <div class="phase-box is-active-priority">
+                    <div class="phase-box-top">
+                      <span class="phase-tag priority">🟢 PRIORIDAD ACTUAL</span>
+                      <span style="font-size:0.75rem; font-weight:700; color:#15803d;">Hito 1</span>
+                    </div>
+                    <h5 class="phase-title">🎙️ Templo Mayor (4 Micrófonos)</h5>
+                    <p class="phase-desc">
+                      4 micrófonos × 2 pilas = 8 en uso + 8 en relevo = <strong>16 pilas AA (8 packs)</strong>.
+                    </p>
+                    <div class="phase-track">
+                      <div class="phase-fill" style="width: ${p1Pct}%;"></div>
+                    </div>
+                    <div class="phase-meta-stats">
+                      <span>Recaudado: <strong>${formatCurrency(p1Raised)}</strong></span>
+                      <span class="phase-meta-val">Meta: ${formatCurrency(p1Cost)}</span>
+                    </div>
+                    <div class="phase-remaining-hint">
+                      ✓ ${p1Pct}% cumplido • Faltan ${formatCurrency(p1Remaining)}
+                    </div>
+                  </div>
+
+                  <!-- Hito 2: Salón Capilla -->
+                  <div class="phase-box">
+                    <div class="phase-box-top">
+                      <span class="phase-tag pending">⏳ PRÓXIMO HITO</span>
+                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 2</span>
+                    </div>
+                    <h5 class="phase-title">🎙️ Salón Capilla (2 Micrófonos)</h5>
+                    <p class="phase-desc">
+                      2 micrófonos × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
+                    </p>
+                    <div class="phase-track">
+                      <div class="phase-fill" style="width: ${p2Pct}%;"></div>
+                    </div>
+                    <div class="phase-meta-stats">
+                      <span>Recaudado: <strong>${formatCurrency(p2Raised)}</strong></span>
+                      <span class="phase-meta-val">Meta: ${formatCurrency(p2Cost)}</span>
+                    </div>
+                    <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
+                      Se activa tras completar la Fase 1
+                    </div>
+                  </div>
+
+                  <!-- Hito 3: Velas Adoración Continua -->
+                  <div class="phase-box">
+                    <div class="phase-box-top">
+                      <span class="phase-tag pending">⏳ HITO FINAL</span>
+                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 3</span>
+                    </div>
+                    <h5 class="phase-title">🕯️ Adoración al Santísimo (2 Velas)</h5>
+                    <p class="phase-desc">
+                      2 velas × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
+                    </p>
+                    <div class="phase-track">
+                      <div class="phase-fill" style="width: ${p3Pct}%;"></div>
+                    </div>
+                    <div class="phase-meta-stats">
+                      <span>Recaudado: <strong>${formatCurrency(p3Raised)}</strong></span>
+                      <span class="phase-meta-val">Meta: ${formatCurrency(p3Cost)}</span>
+                    </div>
+                    <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
+                      Iluminación continua sin cortes
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Resumen Global de las 3 Fases -->
+                <div class="phase-global-summary-bar">
+                  <span><strong>Meta Total Proyecto (3 Fases):</strong> 16 packs (32 pilas AA) = <strong>${formatCurrency(totalRepairCost)}</strong></span>
+                  <span>Total Aportado: <strong>${formatCurrency(raised)}</strong> (${fundingPct}% global)</span>
+                </div>
               </div>
-              <div class="parallel-progress-footer">
-                <span class="parallel-pct-text">Avance: <strong>${fundingPct}%</strong></span>
-                <span class="parallel-remaining-badge">
-                  ⏳ Faltan por recaudar: <strong>${formatCurrency(remainingNeeded)}</strong>
-                </span>
-              </div>
-            </div>
-          </div>
+            `;
+          })()}
 
           <!-- Acciones de Entrada al Embudo -->
           <div class="funnel-entry-actions">
@@ -1803,29 +1914,25 @@ function renderRepairsGrid() {
 
             <div class="tech-calc-box">
               <ul class="tech-calc-list">
-                <li>
-                  <span>🎙️</span>
-                  <span><strong>4 micrófonos en el Templo Mayor:</strong> 4 × 2 pilas AA = <strong>8 pilas AA</strong>.</span>
+                <li style="border-left: 3px solid #16a34a; padding-left: 0.75rem; background: rgba(22, 163, 74, 0.04);">
+                  <span>🎯</span>
+                  <span><strong>FASE 1 (PRIORIDAD ACTUAL • 4 Micrófonos Templo Mayor):</strong> 4 micrófonos × 2 pilas = 8 pilas en uso simultáneo en el presbiterio. Con el sistema de relevo continuo (el doble para tener siempre pilas cargando en sacristía), se requieren <strong>16 pilas AA (8 packs)</strong>. Meta Fase 1: <strong>$50.320</strong>. Recaudado actual: <strong>$29.000 (58%)</strong>. Faltan sólo <strong>$21.320</strong>.</span>
                 </li>
                 <li>
                   <span>🎙️</span>
-                  <span><strong>2 micrófonos en el Salón Capilla:</strong> 2 × 2 pilas AA = <strong>4 pilas AA</strong>.</span>
+                  <span><strong>FASE 2 (Próximo Hito • 2 Micrófonos Salón Capilla):</strong> 2 micrófonos × 2 pilas = 4 pilas en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 2: <strong>$25.160</strong>.</span>
                 </li>
                 <li>
                   <span>🕯️</span>
-                  <span><strong>2 velas eléctricas (Adoración al Santísimo):</strong> 2 × 2 pilas AA = <strong>4 pilas AA</strong>.</span>
-                </li>
-                <li>
-                  <span>🔋</span>
-                  <span><strong>Total en uso simultáneo continuo:</strong> 8 + 4 + 4 = <strong>16 pilas AA</strong> en operación activa.</span>
+                  <span><strong>FASE 3 (Hito Final • 2 Velas Eléctricas Adoración al Santísimo):</strong> 2 velas × 2 pilas = 4 pilas en uso continuo + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 3: <strong>$25.160</strong>.</span>
                 </li>
                 <li>
                   <span>🔄</span>
-                  <span><strong>Rotación continua (2 juegos):</strong> Se requiere el doble (16 × 2 = <strong>32 pilas AA</strong>) para que mientras un juego está en uso, el de relevo se recargue en sacristía.</span>
+                  <span><strong>¿Por qué el doble de pilas?</strong> Para garantizar la continuidad litúrgica: mientras un juego de pilas está instalado y operando en los micrófonos o velas, el segundo juego de reemplazo permanece en el cargador de sacristía listo para intercambio inmediato.</span>
                 </li>
                 <li>
                   <span>📦</span>
-                  <span><strong>16 packs de 2 pilas = 32 pilas AA en total (Energizer 2000 mAh):</strong> Al venir en formato de 2 pilas por pack, se requieren 16 packs para completar las 32 pilas del sistema de rotación. A $6.290 cada pack = <strong>${formatCurrency(totalRepairCost)} total</strong>.</span>
+                  <span><strong>Total Proyecto Consolidado:</strong> 16 + 8 + 8 = <strong>32 pilas AA en total (16 packs de 2 pilas Energizer 2000 mAh)</strong> = <strong>${formatCurrency(totalRepairCost)}</strong>.</span>
                 </li>
               </ul>
             </div>
