@@ -14,7 +14,7 @@ Este documento recopila la información institucional, técnica, operativa, fina
 | **Fecha de Erección Canónica** | **17 de agosto de 1956** |
 | **Congregación Religiosa a Cargo** | **Hijos de Santa María Inmaculada (HSMI)**<br>Fundada por el Venerable Padre José Frassinetti (1804–1868), continuada por Don Antonio Piccardo y con patrocinio del Papa San Pío X. Presentes en la parroquia desde su origen. |
 | **Dirección** | Isabel La Católica 6319, Las Condes, Santiago, Región Metropolitana, Chile |
-| **Sitio Web Oficial** | [www.parroquiasanpatricio.cl](https://www.parroquiasanpatricio.cl) |
+| **Plataforma Web** | Plataforma técnica autónoma e independiente (autoreferenciada) |
 | **Teléfono Fijo Secretaría** | [+56 2 2229 9060](tel:+56222299060) |
 | **Celular & WhatsApp Parroquial** | [+56 9 3348 4878](https://wa.me/56933484878) |
 | **Correo Electrónico** | [secreparroquiasanpatricio@gmail.com](mailto:secreparroquiasanpatricio@gmail.com) |
@@ -81,7 +81,7 @@ Los aportes a proyectos técnicos y el sostenimiento parroquial se gestionan a t
 | **Código QR Integrado** | Disponible en la plataforma web (`assets/qr-mercadopago.svg`) para escaneo desde app móvil |
 
 > [!NOTE]
-> La parroquia también promueve activamente el **1% CALI (Contribución a la Iglesia)**, mediante mandato PAC, PAT o transferencia regular para la mantención del culto, sacerdotes y auxilio a parroquias más vulnerables de Santiago.
+> Esta plataforma es un canal técnico independiente dedicado exclusivamente a la planificación, transparencia de cotizaciones y recaudación focalizada de mejoras de infraestructura y equipamiento.
 
 ---
 

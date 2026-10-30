@@ -2491,7 +2491,7 @@ function renderReportContent() {
         <div>
           <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #ffffff; margin: 0;">Parroquia San Patricio — Balance y Transparencia Técnica</h3>
           <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 0.2rem;">
-            Isabel La Católica 6319, Las Condes | Banco Santander Cta. Cte. 73235740 | RUT 82.566.800-4 | secreparroquiasanpatricio@gmail.com
+            Isabel La Católica 6319, Las Condes | Mercado Pago Cta. Vista 1011953574 | RUT 14.148.009-k | rodrigo.quezadab@gmail.com
           </p>
         </div>
       </div>
