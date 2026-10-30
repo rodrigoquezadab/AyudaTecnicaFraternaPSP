@@ -137,3 +137,17 @@ En la carpeta local `assets/` se encuentran almacenados los recursos oficiales r
   - Alta: `#F59E0B` (Ámbar)
   - Recaudación activa / Progreso: `#10B981` (Verde éxito / Esperanza)
   - Técnico / Informática: `#06B6D4` (Cian moderno)
+
+
+---
+
+## 7. 📱 Arquitectura de Navegación UX: Tarjetas Resumidas y Vista de Detalles
+
+Para ofrecer una experiencia limpia, visual y accesible:
+1. **Vista Principal (Tarjetas Resumidas):**
+   - Cada iniciativa (Campaña Activa de Pilas, Proyecto Futuro de Iluminación del Comedor y elementos del Backlog) se exhibe como una tarjeta sintetizada y compacta.
+   - Contiene: distintivo de estado, fotografía de vista previa o icono temático, título, sector parroquial, descripción de una línea, barra de avance o presupuesto unitario, y botón de acción.
+2. **Navegación al Detalle del Proyecto (`#/proyecto/<id>`):**
+   - Al pulsar cualquier tarjeta (o su botón 'Ver Detalles'), la plataforma navega fluidamente hacia la vista completa del proyecto.
+   - Cuenta con barra superior e inferior `← Volver a Proyectos Parroquiales` y sincronización con el historial del navegador (`hashchange`) para que el botón 'Atrás' del teléfono o navegador regrese a la lista general.
+   - En el detalle de Pilas se despliega la galería de 4 micrófonos en rack, el modelo SKP UHF 600 PRO, desglose de las 3 fases (Templo, Capilla, Adoración) y la guía interactiva de 3 pasos con los datos de transferencia a Mercado Pago y el código QR.

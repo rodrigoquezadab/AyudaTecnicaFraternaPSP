@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v16';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v17';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -829,7 +829,8 @@ let currentFilterArea = 'all';
 let searchQuery = '';
 let sortBy = 'recent';
 let currentViewMode = localStorage.getItem('parroquia_view_mode') || 'grid';
-let currentProjectSection = 'active'; // 'active' (Proyecto Activo) or 'backlog' (Proyectos por Realizar)
+let currentProjectSection = 'active';
+let activeDetailsProjectId = null; // 'active' (Proyecto Activo) or 'backlog' (Proyectos por Realizar)
 
 // Catalog State
 let catalogSearchQuery = '';
@@ -1401,6 +1402,46 @@ window.promoteToActive = function(repairId) {
   }
 };
 
+
+window.navigateToProjectDetails = function(repairId) {
+  activeDetailsProjectId = repairId;
+  window.location.hash = '#/proyecto/' + repairId;
+  renderRepairsGrid();
+  const container = document.getElementById('repairs-container');
+  if (container) {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+window.navigateToProjectsList = function() {
+  activeDetailsProjectId = null;
+  if (window.location.hash.startsWith('#/proyecto/')) {
+    history.pushState(null, '', window.location.pathname + window.location.search);
+  }
+  renderRepairsGrid();
+  const container = document.getElementById('repairs-container');
+  if (container) {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+function handleHashNavigation() {
+  const hash = window.location.hash || '';
+  if (hash.startsWith('#/proyecto/')) {
+    const id = hash.replace('#/proyecto/', '').trim();
+    if (appData.repairs.some(r => r.id === id)) {
+      activeDetailsProjectId = id;
+    } else {
+      activeDetailsProjectId = null;
+    }
+  } else {
+    activeDetailsProjectId = null;
+  }
+  renderRepairsGrid();
+}
+
+window.addEventListener('hashchange', handleHashNavigation);
+
 window.activeFunnelStep = 'causa';
 
 window.setFunnelStep = function(step) {
@@ -1419,258 +1460,71 @@ window.setFunnelStep = function(step) {
   }
 };
 
-function renderRepairsGrid() {
-  const filtered = getFilteredRepairs();
-  const activePlaceName = currentFilterPlace === 'all' ? 'Cualquier Sector' : currentFilterPlace;
 
-  const statusLabels = {
-    planificacion: 'En Planificación',
-    recaudacion: 'En Recaudación',
-    compras: 'En Compras',
-    ejecucion: 'En Ejecución',
-    completado: 'Completado'
-  };
+function renderProjectDetailsView(repair, statusLabels) {
+  const activeStep = window.activeFunnelStep || 'causa';
+  const items = repair.items || [];
+  let repairMaterialsCost = 0;
+  let repairBoughtCount = 0;
+  let totalQty = 0;
 
-  const backlogBannerHtml = `
-    <div class="backlog-banner">
-      <div class="backlog-banner-icon">📋</div>
-      <div class="backlog-banner-body">
-        <div class="backlog-banner-title">Banco de Proyectos Técnicos Parroquiales (Backlog / Por Realizar)</div>
-        <div class="backlog-banner-desc">
-          Estas iniciativas técnicas e infraestructurales ya cuentan con su diagnóstico, cotizaciones y materiales especificados. Se encuentran en espera para focalizar los esfuerzos comunitarios en la compra activa de pilas recargables para micrófonos y adoración continua.
+  items.forEach(itm => {
+    const price = Number(itm.price) || 0;
+    const qty = Number(itm.qty) || 1;
+    repairMaterialsCost += price * qty;
+    totalQty += qty;
+    if (itm.bought) repairBoughtCount += qty;
+  });
+
+  const laborCost = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
+  const totalRepairCost = repairMaterialsCost + laborCost;
+  const raised = Number(repair.raisedAmount) || 0;
+  const fundingPct = totalRepairCost > 0 ? Math.min(100, Math.round((raised / totalRepairCost) * 100)) : 0;
+  const remainingNeeded = Math.max(0, totalRepairCost - raised);
+
+  // 1. SPECIFIC VIEW FOR BATTERY PROJECT
+  if (repair.id === 'rep_pilas_microfonos') {
+    const p1Packs = 8;
+    const p1Cost = p1Packs * 6290; // $50.320
+    const p1Raised = Math.min(raised, p1Cost); // $29.000
+    const p1Pct = p1Cost > 0 ? Math.min(100, Math.round((p1Raised / p1Cost) * 100)) : 0;
+    const p1Remaining = Math.max(0, p1Cost - p1Raised); // $21.320
+
+    const p2Packs = 4;
+    const p2Cost = p2Packs * 6290; // $25.160
+    const p2Raised = Math.max(0, Math.min(raised - p1Cost, p2Cost));
+    const p2Pct = p2Cost > 0 ? Math.min(100, Math.round((p2Raised / p2Cost) * 100)) : 0;
+
+    const p3Packs = 4;
+    const p3Cost = p3Packs * 6290; // $25.160
+    const p3Raised = Math.max(0, Math.min(raised - p1Cost - p2Cost, p3Cost));
+    const p3Pct = p3Cost > 0 ? Math.min(100, Math.round((p3Raised / p3Cost) * 100)) : 0;
+
+    return `
+      <div class="project-details-view">
+        <div class="project-details-header-bar">
+          <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>← Volver a Proyectos Parroquiales</span>
+          </button>
+          <div class="details-status-pill">🟢 Campaña Parroquial Activa</div>
         </div>
-      </div>
-    </div>
-  `;
 
-  // Quick Add HTML for List View or Location View
-  const quickAddHtml = `
-    <div class="quick-add-bar">
-      <div class="quick-add-header">
-        <span class="quick-add-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          Creación Rápida en <strong>${escapeHtml(activePlaceName)}</strong>
-        </span>
-        <span class="quick-add-hint">Registra proyectos técnicos parroquiales para presupuestar y recaudar</span>
-      </div>
-      <form class="quick-add-inputs" onsubmit="handleQuickAdd(event)">
-        ${currentFilterPlace === 'all' ? `
-          <input type="text" id="quick-input-place" class="form-input" placeholder="Sector (ej: Templo Mayor)..." list="places-list" value="Templo Mayor" required style="font-size:0.85rem;">
-        ` : ''}
-        <input type="text" id="quick-input-title" class="form-input" placeholder="Proyecto técnico (ej: Nuevos micrófonos inalámbricos)..." required style="font-size:0.85rem;">
-        <input type="text" id="quick-input-area" class="form-input" placeholder="Espacio (ej: Altar, Nave Central)..." list="areas-list" value="${currentFilterArea !== 'all' ? escapeHtml(currentFilterArea) : ''}" required style="font-size:0.85rem;">
-        <select id="quick-input-priority" class="form-select" style="font-size:0.85rem; min-width: 130px;">
-          <option value="alta" selected>Prioridad Alta</option>
-          <option value="urgente">🚨 Urgente (Falla activa)</option>
-          <option value="media">Prioridad Media</option>
-          <option value="baja">Prioridad Baja</option>
-        </select>
-        <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #15803d, #16a34a);">
-          + Crear Rápido
-        </button>
-      </form>
-    </div>
-  `;
-
-  if (filtered.length === 0) {
-    repairsContainer.className = 'repairs-container';
-    repairsContainer.innerHTML = `
-      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
-      ${currentViewMode === 'list' ? quickAddHtml : ''}
-      <div class="empty-state" style="grid-column: 1 / -1;">
-        <div class="empty-icon">${currentProjectSection === 'backlog' ? '📋' : '🍀'}</div>
-        <h3 style="font-size: 1.15rem; font-family: var(--font-heading);">${currentProjectSection === 'backlog' ? 'No hay proyectos en el backlog' : 'No hay proyectos activos'}</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 440px;">
-          ${searchQuery ? `No hay resultados para "${escapeHtml(searchQuery)}". Intenta con otra palabra clave o limpia los filtros.` : (currentProjectSection === 'backlog' ? 'Todas las iniciativas técnicas están actualmente activas o completadas.' : 'Actualmente no hay campañas en curso en este sector.')}
-        </p>
-        <button class="btn btn-primary btn-sm" onclick="openRepairModal()" style="background: linear-gradient(135deg, #15803d, #16a34a);">+ Nuevo Proyecto</button>
-      </div>
-    `;
-    return;
-  }
-
-  // LIST VIEW MODE (Compact Transparency Table)
-  if (currentViewMode === 'list') {
-    repairsContainer.className = 'repairs-container';
-    let rowsHtml = filtered.map(repair => {
-      const items = repair.items || [];
-      let matCost = 0;
-      let boughtCount = 0;
-      let totalQty = 0;
-      items.forEach(itm => {
-        const p = Number(itm.price) || 0;
-        const q = Number(itm.qty) || 1;
-        matCost += p * q;
-        totalQty += q;
-        if (itm.bought) boughtCount += q;
-      });
-      const labor = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
-      const total = matCost + labor;
-      const progressPct = totalQty > 0 ? Math.round((boughtCount / totalQty) * 100) : 0;
-      const raised = Number(repair.raisedAmount) || 0;
-      const fundingPct = total > 0 ? Math.min(100, Math.round((raised / total) * 100)) : 0;
-      const hasNotes = Boolean(repair.description && repair.description.trim() !== '');
-
-      return `
-        <tr class="repairs-list-row" onclick="editRepair('${repair.id}')" title="Haz clic para ver y editar este proyecto">
-          <td>
-            <span class="tag tag-priority-${repair.priority || 'media'}">
-              ${repair.priority ? repair.priority.toUpperCase() : 'MEDIA'}
-            </span>
-          </td>
-          <td>
-            <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
-              <span class="tag tag-place">${escapeHtml(repair.place || 'Sector')}</span>
-              <span class="tag tag-area">${escapeHtml(repair.area || 'Espacio')}</span>
-            </div>
-          </td>
-          <td>
-            <div class="list-title-cell">
-              <span class="list-title-text">
-                ${escapeHtml(repair.title)}
-                ${hasNotes ? `<span class="list-notes-badge" title="Tiene bitácora técnica">📝 Bitácora</span>` : ''}
-              </span>
-              <div style="display: flex; gap: 0.3rem; align-items: center; margin-top: 0.2rem;">
-                <span class="tag tag-specialty" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">${escapeHtml(repair.specialty || 'General')}</span>
-                <span class="tag tag-status-${escapeHtml(repair.status || 'recaudacion')}" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">${escapeHtml(statusLabels[repair.status] || 'En Recaudación')}</span>
-              </div>
-            </div>
-          </td>
-          <td>
-            <div class="list-progress-wrapper" title="Recaudado: ${formatCurrency(raised)} de ${formatCurrency(total)}">
-              <div class="list-progress-text">
-                <span style="color: #4ade80; font-weight: 600;">${formatCurrency(raised)}</span>
-                <span style="color: var(--text-subtle);">${fundingPct}%</span>
-              </div>
-              <div class="card-mini-progress">
-                <div class="card-mini-progress-fill" style="width: ${fundingPct}%; background: ${fundingPct >= 100 ? '#22c55e' : 'linear-gradient(90deg, #16a34a, #eab308)'};"></div>
-              </div>
-            </div>
-          </td>
-          <td>
-            <div class="list-progress-wrapper">
-              <div class="list-progress-text">
-                <span>${items.length} mats</span>
-                <span style="font-weight:600;">${boughtCount}/${totalQty}</span>
-              </div>
-              <div class="card-mini-progress">
-                <div class="card-mini-progress-fill" style="width: ${progressPct}%;"></div>
-              </div>
-            </div>
-          </td>
-          <td class="num-col">
-            <span class="list-amount-text">${formatCurrency(total)}</span>
-          </td>
-          <td>
-            <div class="list-actions-cell" onclick="event.stopPropagation();">
-              ${repair.status === 'planificacion' ? `
-                <button class="btn-activate-project" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="promoteToActive('${repair.id}')" title="Activar proyecto e iniciar compras">
-                  🚀 Activar
-                </button>
-                <button class="card-manage-btn" onclick="editRepair('${repair.id}')" title="Entrar al proyecto">
-                  Ver
-                </button>
-              ` : `
-                <button class="btn-donate-card" style="padding: 0.28rem 0.55rem; font-size: 0.72rem;" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto">
-                  Donar
-                </button>
-                <button class="card-manage-btn" onclick="editRepair('${repair.id}')" title="Entrar al proyecto">
-                  Ver
-                </button>
-              `}
-              <button class="icon-btn-ghost delete" title="Eliminar proyecto" onclick="deleteRepair('${repair.id}')" aria-label="Eliminar">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    repairsContainer.innerHTML = `
-      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
-      ${quickAddHtml}
-      <div class="repairs-list-wrapper">
-        <table class="repairs-list-table">
-          <thead>
-            <tr>
-              <th style="width: 85px;">Prioridad</th>
-              <th style="width: 170px;">Ubicación</th>
-              <th>Proyecto / Especialidad</th>
-              <th style="width: 150px;">Recaudación</th>
-              <th style="width: 130px;">Materiales</th>
-              <th class="num-col" style="width: 110px;">Presupuesto</th>
-              <th style="width: 140px; text-align: right;">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-      </div>
-    `;
-    return;
-  }
-
-  // GRID VIEW MODE (Rich Parish Project Cards)
-  repairsContainer.className = 'repairs-grid';
-
-  if (currentProjectSection === 'active') {
-    const activeStep = window.activeFunnelStep || 'causa';
-
-    let html = `
-      <div class="active-campaign-banner">
-        <div class="active-campaign-badge">
-          <span class="pulse-beacon"></span>
-          <span>CAMPAÑA PARROQUIAL ACTIVA</span>
-        </div>
-        <h2 class="active-campaign-title">Pilas Recargables AA (3 Fases) • Prioridad: Templo Mayor</h2>
-        <p class="active-campaign-subtitle">
-          <strong>Meta Prioritaria Actual (Fase 1):</strong> 16 pilas AA (8 packs) para los 4 micrófonos del Templo Mayor. Se requiere el doble para contar con un juego en uso y otro cargando en sacristía.
-        </p>
-      </div>
-    `;
-
-    filtered.forEach(repair => {
-      const items = repair.items || [];
-      let repairMaterialsCost = 0;
-      let repairBoughtCount = 0;
-      let totalQty = 0;
-
-      items.forEach(itm => {
-        const price = Number(itm.price) || 0;
-        const qty = Number(itm.qty) || 1;
-        repairMaterialsCost += price * qty;
-        totalQty += qty;
-        if (itm.bought) repairBoughtCount += qty;
-      });
-
-      const laborCost = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
-      const totalRepairCost = repairMaterialsCost + laborCost;
-      const raised = Number(repair.raisedAmount) || 0;
-      const fundingPct = totalRepairCost > 0 ? Math.min(100, Math.round((raised / totalRepairCost) * 100)) : 0;
-      const remainingNeeded = Math.max(0, totalRepairCost - raised);
-
-      html += `
-        <!-- Nivel 1 del Embudo: Entrada Simple, Directa y sin Saturación -->
-        <article class="featured-active-card" data-id="${repair.id}">
+        <article class="featured-active-card in-details-view" data-id="${repair.id}">
           <div class="card-top">
             <div class="hierarchy-tags">
               <span class="tag tag-place">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
                 Templo Mayor & Capilla
               </span>
-              <span class="tag tag-specialty">
-                🎙️ Audio Litúrgico
-              </span>
-              <span class="tag tag-status-compras">
-                🟢 En Recaudación
-              </span>
+              <span class="tag tag-specialty">🎙️ Audio Litúrgico</span>
+              <span class="tag tag-status-compras">🟢 En Recaudación</span>
+              <span class="tag tag-priority-alta">ALTA</span>
             </div>
           </div>
 
           <div class="card-main-body">
-            <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
+            <h2 class="repair-title" style="font-size: 1.45rem;">${escapeHtml(repair.title)}</h2>
             <p class="repair-lead-text">
               En el proyecto son <strong>4 micrófonos para el Templo, 2 para la Capilla y 2 velas para la Adoración al Santísimo Sacramento</strong>. Cada aparato utiliza <strong>2 pilas cada uno</strong> y debemos tener <strong>el doble de pilas para tener siempre unas en uso y otras en carga</strong> (32 pilas en total). La <strong>prioridad actual y meta a cumplir</strong> son las <strong>16 pilas para los 4 micrófonos del Templo</strong>.
             </p>
@@ -1765,176 +1619,147 @@ function renderRepairsGrid() {
             </div>
           </div>
 
-          <!-- Desglose de Fases e Hitos del Proyecto Pilas -->
-          ${(() => {
-            const p1Packs = 8;
-            const p1Cost = p1Packs * 6290; // $50.320
-            const p1Raised = Math.min(raised, p1Cost); // $29.000
-            const p1Pct = p1Cost > 0 ? Math.min(100, Math.round((p1Raised / p1Cost) * 100)) : 0;
-            const p1Remaining = Math.max(0, p1Cost - p1Raised); // $21.320
+          <!-- Visualización en Paralelo: Foco en la Meta Prioritaria Actual (Fase 1) -->
+          <div class="parallel-funding-card">
+            <div class="parallel-priority-kicker">
+              <span class="priority-pulse-dot"></span>
+              <span>PRIORIDAD ACTUAL: 16 PILAS TEMPLO MAYOR (4 MICRÓFONOS EN ROTACIÓN)</span>
+            </div>
 
-            const p2Packs = 4;
-            const p2Cost = p2Packs * 6290; // $25.160
-            const p2Raised = Math.max(0, Math.min(raised - p1Cost, p2Cost));
-            const p2Pct = p2Cost > 0 ? Math.min(100, Math.round((p2Raised / p2Cost) * 100)) : 0;
-
-            const p3Packs = 4;
-            const p3Cost = p3Packs * 6290; // $25.160
-            const p3Raised = Math.max(0, Math.min(raised - p1Cost - p2Cost, p3Cost));
-            const p3Pct = p3Cost > 0 ? Math.min(100, Math.round((p3Raised / p3Cost) * 100)) : 0;
-
-            return `
-              <!-- Visualización en Paralelo: Foco en la Meta Prioritaria Actual (Fase 1) -->
-              <div class="parallel-funding-card">
-                <div class="parallel-priority-kicker">
-                  <span class="priority-pulse-dot"></span>
-                  <span>PRIORIDAD ACTUAL: 16 PILAS TEMPLO MAYOR (4 MICRÓFONOS EN ROTACIÓN)</span>
+            <div class="parallel-stats-grid">
+              <div class="parallel-stat-box recaudado">
+                <div class="parallel-stat-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <span>Recaudado Actual</span>
                 </div>
-
-                <div class="parallel-stats-grid">
-                  <!-- Columna 1: Lo que tenemos recaudado -->
-                  <div class="parallel-stat-box recaudado">
-                    <div class="parallel-stat-header">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                      <span>Recaudado Actual</span>
-                    </div>
-                    <div class="parallel-stat-amount">${formatCurrency(raised)}</div>
-                    <div class="parallel-stat-sub">
-                      <span>✓ <strong>${p1Pct}% cumplido</strong> de la Fase 1 (${fundingPct}% global)</span>
-                    </div>
-                  </div>
-
-                  <!-- Columna 2: La meta de Fase 1 -->
-                  <div class="parallel-stat-box meta">
-                    <div class="parallel-stat-header">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                      <span>Meta Prioridad (Fase 1)</span>
-                    </div>
-                    <div class="parallel-stat-amount">${formatCurrency(p1Cost)}</div>
-                    <div class="parallel-stat-sub">
-                      <span>🎯 8 packs = 16 pilas AA (Templo)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Barra de Avance y Faltante conectando ambos -->
-                <div class="parallel-progress-section">
-                  <div class="parallel-track" title="${p1Pct}% recaudado de la Fase 1">
-                    <div class="parallel-bar-fill" style="width: ${p1Pct}%;"></div>
-                  </div>
-                  <div class="parallel-progress-footer">
-                    <span class="parallel-pct-text">Cumplimiento Fase 1: <strong>${p1Pct}%</strong></span>
-                    <span class="parallel-remaining-badge">
-                      ⏳ Faltan para cumplir Fase 1: <strong>${formatCurrency(p1Remaining)}</strong>
-                    </span>
-                  </div>
+                <div class="parallel-stat-amount">${formatCurrency(raised)}</div>
+                <div class="parallel-stat-sub">
+                  <span>✓ <strong>${p1Pct}% cumplido</strong> de la Fase 1 (${fundingPct}% global)</span>
                 </div>
               </div>
 
-              <!-- Tablero de las 3 Fases del Proyecto con Cumplimiento de Hitos -->
-              <div class="phase-milestones-card">
-                <div class="phase-milestones-header">
-                  <h4 class="phase-milestones-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                    <span>Cumplimiento y Metas por Hitos (3 Fases)</span>
-                  </h4>
-                  <span class="phase-milestones-badge">Regla: El Doble para Uso y Carga</span>
+              <div class="parallel-stat-box meta">
+                <div class="parallel-stat-header">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                  <span>Meta Prioridad (Fase 1)</span>
                 </div>
-
-                <!-- Banner Resumen de la Regla del Proyecto -->
-                <div class="phase-formula-banner">
-                  <div class="formula-col">
-                    <span class="formula-label">8 Aparatos Parroquiales</span>
-                    <span class="formula-text">4 mic. Templo + 2 mic. Capilla + 2 velas Santísimo</span>
-                  </div>
-                  <div class="formula-op">× 2 pilas =</div>
-                  <div class="formula-col">
-                    <span class="formula-label">En Uso Simultáneo</span>
-                    <span class="formula-text">16 pilas AA activas</span>
-                  </div>
-                  <div class="formula-op">× 2 (Doble) =</div>
-                  <div class="formula-col highlight">
-                    <span class="formula-label">Meta Total</span>
-                    <span class="formula-text">32 pilas (16 en uso + 16 en carga)</span>
-                  </div>
-                </div>
-
-                <div class="phase-milestones-grid">
-                  <!-- Hito 1: Templo Mayor (Prioridad Actual) -->
-                  <div class="phase-box is-active-priority">
-                    <div class="phase-box-top">
-                      <span class="phase-tag priority">🟢 PRIORIDAD ACTUAL</span>
-                      <span style="font-size:0.75rem; font-weight:700; color:#15803d;">Hito 1</span>
-                    </div>
-                    <h5 class="phase-title">🎙️ Templo Mayor (4 Micrófonos)</h5>
-                    <p class="phase-desc">
-                      4 micrófonos × 2 pilas = 8 en uso + 8 en relevo = <strong>16 pilas AA (8 packs)</strong>.
-                    </p>
-                    <div class="phase-track">
-                      <div class="phase-fill" style="width: ${p1Pct}%;"></div>
-                    </div>
-                    <div class="phase-meta-stats">
-                      <span>Recaudado: <strong>${formatCurrency(p1Raised)}</strong></span>
-                      <span class="phase-meta-val">Meta: ${formatCurrency(p1Cost)}</span>
-                    </div>
-                    <div class="phase-remaining-hint">
-                      ✓ ${p1Pct}% cumplido • Faltan ${formatCurrency(p1Remaining)}
-                    </div>
-                  </div>
-
-                  <!-- Hito 2: Salón Capilla -->
-                  <div class="phase-box">
-                    <div class="phase-box-top">
-                      <span class="phase-tag pending">⏳ PRÓXIMO HITO</span>
-                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 2</span>
-                    </div>
-                    <h5 class="phase-title">🎙️ Salón Capilla (2 Micrófonos)</h5>
-                    <p class="phase-desc">
-                      2 micrófonos × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
-                    </p>
-                    <div class="phase-track">
-                      <div class="phase-fill" style="width: ${p2Pct}%;"></div>
-                    </div>
-                    <div class="phase-meta-stats">
-                      <span>Recaudado: <strong>${formatCurrency(p2Raised)}</strong></span>
-                      <span class="phase-meta-val">Meta: ${formatCurrency(p2Cost)}</span>
-                    </div>
-                    <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
-                      Se activa tras completar la Fase 1
-                    </div>
-                  </div>
-
-                  <!-- Hito 3: Velas Adoración Continua -->
-                  <div class="phase-box">
-                    <div class="phase-box-top">
-                      <span class="phase-tag pending">⏳ HITO FINAL</span>
-                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 3</span>
-                    </div>
-                    <h5 class="phase-title">🕯️ Adoración al Santísimo (2 Velas)</h5>
-                    <p class="phase-desc">
-                      2 velas × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
-                    </p>
-                    <div class="phase-track">
-                      <div class="phase-fill" style="width: ${p3Pct}%;"></div>
-                    </div>
-                    <div class="phase-meta-stats">
-                      <span>Recaudado: <strong>${formatCurrency(p3Raised)}</strong></span>
-                      <span class="phase-meta-val">Meta: ${formatCurrency(p3Cost)}</span>
-                    </div>
-                    <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
-                      Iluminación continua sin cortes
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Resumen Global de las 3 Fases -->
-                <div class="phase-global-summary-bar">
-                  <span><strong>Meta Total Proyecto (3 Fases):</strong> 16 packs (32 pilas AA) = <strong>${formatCurrency(totalRepairCost)}</strong></span>
-                  <span>Total Aportado: <strong>${formatCurrency(raised)}</strong> (${fundingPct}% global)</span>
+                <div class="parallel-stat-amount">${formatCurrency(p1Cost)}</div>
+                <div class="parallel-stat-sub">
+                  <span>🎯 8 packs = 16 pilas AA (Templo)</span>
                 </div>
               </div>
-            `;
-          })()}
+            </div>
+
+            <div class="parallel-progress-section">
+              <div class="parallel-track" title="${p1Pct}% recaudado de la Fase 1">
+                <div class="parallel-bar-fill" style="width: ${p1Pct}%;"></div>
+              </div>
+              <div class="parallel-progress-footer">
+                <span class="parallel-pct-text">Cumplimiento Fase 1: <strong>${p1Pct}%</strong></span>
+                <span class="parallel-remaining-badge">
+                  ⏳ Faltan para cumplir Fase 1: <strong>${formatCurrency(p1Remaining)}</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tablero de las 3 Fases del Proyecto con Cumplimiento de Hitos -->
+          <div class="phase-milestones-card">
+            <div class="phase-milestones-header">
+              <h4 class="phase-milestones-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>Cumplimiento y Metas por Hitos (3 Fases)</span>
+              </h4>
+              <span class="phase-milestones-badge">Regla: El Doble para Uso y Carga</span>
+            </div>
+
+            <div class="phase-formula-banner">
+              <div class="formula-col">
+                <span class="formula-label">8 Aparatos Parroquiales</span>
+                <span class="formula-text">4 mic. Templo + 2 mic. Capilla + 2 velas Santísimo</span>
+              </div>
+              <div class="formula-op">× 2 pilas =</div>
+              <div class="formula-col">
+                <span class="formula-label">En Uso Simultáneo</span>
+                <span class="formula-text">16 pilas AA activas</span>
+              </div>
+              <div class="formula-op">× 2 (Doble) =</div>
+              <div class="formula-col highlight">
+                <span class="formula-label">Meta Total</span>
+                <span class="formula-text">32 pilas (16 en uso + 16 en carga)</span>
+              </div>
+            </div>
+
+            <div class="phase-milestones-grid">
+              <div class="phase-box is-active-priority">
+                <div class="phase-box-top">
+                  <span class="phase-tag priority">🟢 PRIORIDAD ACTUAL</span>
+                  <span style="font-size:0.75rem; font-weight:700; color:#15803d;">Hito 1</span>
+                </div>
+                <h5 class="phase-title">🎙️ Templo Mayor (4 Micrófonos)</h5>
+                <p class="phase-desc">
+                  4 micrófonos × 2 pilas = 8 en uso + 8 en relevo = <strong>16 pilas AA (8 packs)</strong>.
+                </p>
+                <div class="phase-track">
+                  <div class="phase-fill" style="width: ${p1Pct}%;"></div>
+                </div>
+                <div class="phase-meta-stats">
+                  <span>Recaudado: <strong>${formatCurrency(p1Raised)}</strong></span>
+                  <span class="phase-meta-val">Meta: ${formatCurrency(p1Cost)}</span>
+                </div>
+                <div class="phase-remaining-hint">
+                  ✓ ${p1Pct}% cumplido • Faltan ${formatCurrency(p1Remaining)}
+                </div>
+              </div>
+
+              <div class="phase-box">
+                <div class="phase-box-top">
+                  <span class="phase-tag pending">⏳ PRÓXIMO HITO</span>
+                  <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 2</span>
+                </div>
+                <h5 class="phase-title">🎙️ Salón Capilla (2 Micrófonos)</h5>
+                <p class="phase-desc">
+                  2 micrófonos × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
+                </p>
+                <div class="phase-track">
+                  <div class="phase-fill" style="width: ${p2Pct}%;"></div>
+                </div>
+                <div class="phase-meta-stats">
+                  <span>Recaudado: <strong>${formatCurrency(p2Raised)}</strong></span>
+                  <span class="phase-meta-val">Meta: ${formatCurrency(p2Cost)}</span>
+                </div>
+                <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
+                  Se activa tras completar la Fase 1
+                </div>
+              </div>
+
+              <div class="phase-box">
+                <div class="phase-box-top">
+                  <span class="phase-tag pending">⏳ HITO FINAL</span>
+                  <span style="font-size:0.75rem; font-weight:700; color:var(--text-subtle);">Hito 3</span>
+                </div>
+                <h5 class="phase-title">🕯️ Adoración al Santísimo (2 Velas)</h5>
+                <p class="phase-desc">
+                  2 velas × 2 pilas = 4 en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>.
+                </p>
+                <div class="phase-track">
+                  <div class="phase-fill" style="width: ${p3Pct}%;"></div>
+                </div>
+                <div class="phase-meta-stats">
+                  <span>Recaudado: <strong>${formatCurrency(p3Raised)}</strong></span>
+                  <span class="phase-meta-val">Meta: ${formatCurrency(p3Cost)}</span>
+                </div>
+                <div style="font-size:0.74rem; color:var(--text-subtle); margin-top:0.2rem;">
+                  Iluminación continua sin cortes
+                </div>
+              </div>
+            </div>
+
+            <div class="phase-global-summary-bar">
+              <span><strong>Meta Total Proyecto (3 Fases):</strong> 16 packs (32 pilas AA) = <strong>${formatCurrency(totalRepairCost)}</strong></span>
+              <span>Total Aportado: <strong>${formatCurrency(raised)}</strong> (${fundingPct}% global)</span>
+            </div>
+          </div>
 
           <!-- Acciones de Entrada al Embudo -->
           <div class="funnel-entry-actions">
@@ -1947,265 +1772,243 @@ function renderRepairsGrid() {
             </button>
           </div>
 
-        <!-- Nivel 2 y 3 del Embudo: Contenido Guiado Progresivo -->
-        <section class="project-funnel-section" id="project-funnel-section">
-          <div class="funnel-section-header">
-            <span class="funnel-section-kicker">Guía del Proyecto Parroquial</span>
-            <h3 class="funnel-section-title">De la necesidad a la solución en 3 pasos</h3>
-            <p class="funnel-section-desc">Explora el porqué de esta iniciativa, cómo se calculó cada peso y cómo sumarte.</p>
-          </div>
-
-          <!-- Stepper Navegable del Embudo -->
-          <div class="funnel-stepper-tabs" role="tablist">
-            <button type="button" class="funnel-step-tab ${activeStep === 'causa' ? 'active' : ''}" data-step="causa" onclick="setFunnelStep('causa')">
-              <span class="step-num">1</span>
-              <span class="step-label">La Causa</span>
-            </button>
-            <button type="button" class="funnel-step-tab ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto" onclick="setFunnelStep('presupuesto')">
-              <span class="step-num">2</span>
-              <span class="step-label">Cálculo & Costo</span>
-            </button>
-            <button type="button" class="funnel-step-tab ${activeStep === 'donar' ? 'active' : ''}" data-step="donar" onclick="setFunnelStep('donar')">
-              <span class="step-num">3</span>
-              <span class="step-label">Cómo Donar</span>
-            </button>
-          </div>
-
-          <!-- Panel 1: La Causa (¿Por qué lo hacemos?) -->
-          <div class="funnel-step-panel ${activeStep === 'causa' ? 'active' : ''}" data-step="causa">
-            <div class="funnel-panel-header">
-              <h4>1. ¿Por qué necesitamos pilas recargables?</h4>
-              <p>Para garantizar una voz clara en las celebraciones litúrgicas y mantener iluminadas con devoción y seguridad las velas de la Capilla de Adoración Continua.</p>
+          <!-- Guía del Proyecto en 3 Pasos -->
+          <section class="project-funnel-section" id="project-funnel-section">
+            <div class="funnel-section-header">
+              <span class="funnel-section-kicker">Guía del Proyecto Parroquial</span>
+              <h3 class="funnel-section-title">De la necesidad a la solución en 3 pasos</h3>
+              <p class="funnel-section-desc">Explora el porqué de esta iniciativa, cómo se calculó cada peso y cómo sumarte.</p>
             </div>
 
-            <div class="funnel-reasons-grid">
-              <div class="funnel-reason-card">
-                <div class="reason-icon">🎙️</div>
-                <h5>Audio Continuo en Micrófonos SKP UHF</h5>
-                <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa para los 4 micrófonos SKP UHF 600 PRO del Templo y los 2 de la Capilla.</p>
-              </div>
-
-              <div class="funnel-reason-card">
-                <div class="reason-icon">🕯️</div>
-                <h5>Adoración Eucarística Continua</h5>
-                <p>Mantiene permanentemente iluminadas las 2 velas eléctricas ante el Santísimo Sacramento con rotación segura y sin interrupciones.</p>
-              </div>
-
-              <div class="funnel-reason-card">
-                <div class="reason-icon">💰</div>
-                <h5>Ahorro Parroquial Permanente</h5>
-                <p>Comprar pilas alcalinas semanalmente es un gasto recurrente elevado. Con un solo aporte dotamos a la parroquia de energía para más de 1.000 recargas.</p>
-              </div>
-
-              <div class="funnel-reason-card">
-                <div class="reason-icon">🌱</div>
-                <h5>Cuidado de la Creación</h5>
-                <p>Evitamos desechar cientos de pilas contaminantes al año en el sector, alineándonos con el compromiso de ecología integral.</p>
-              </div>
-            </div>
-
-            <div class="funnel-panel-actions">
-              <button type="button" class="btn-funnel-next" onclick="setFunnelStep('presupuesto')">
-                Siguiente: Ver cómo se calculó la meta (${formatCurrency(totalRepairCost)}) →
+            <div class="funnel-stepper-tabs" role="tablist">
+              <button type="button" class="funnel-step-tab ${activeStep === 'causa' ? 'active' : ''}" data-step="causa" onclick="setFunnelStep('causa')">
+                <span class="step-num">1</span>
+                <span class="step-label">La Causa</span>
+              </button>
+              <button type="button" class="funnel-step-tab ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto" onclick="setFunnelStep('presupuesto')">
+                <span class="step-num">2</span>
+                <span class="step-label">Cálculo & Costo</span>
+              </button>
+              <button type="button" class="funnel-step-tab ${activeStep === 'donar' ? 'active' : ''}" data-step="donar" onclick="setFunnelStep('donar')">
+                <span class="step-num">3</span>
+                <span class="step-label">Cómo Donar</span>
               </button>
             </div>
-          </div>
 
-          <!-- Panel 2: Presupuesto y Cotización Técnica -->
-          <div class="funnel-step-panel ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto">
-            <div class="funnel-panel-header">
-              <h4>2. Cálculo Técnico Transparente de la Meta (${formatCurrency(totalRepairCost)})</h4>
-              <p>Así definimos el presupuesto exacto sin costos ocultos:</p>
-            </div>
-
-            <div class="tech-calc-box">
-              <ul class="tech-calc-list">
-                <li style="border-left: 3px solid #16a34a; padding-left: 0.75rem; background: rgba(22, 163, 74, 0.04);">
-                  <span>🎯</span>
-                  <span><strong>FASE 1 (PRIORIDAD ACTUAL • 4 Micrófonos Templo Mayor):</strong> 4 micrófonos × 2 pilas = 8 pilas en uso simultáneo en el presbiterio. Con el sistema de relevo continuo (el doble para tener siempre pilas cargando en sacristía), se requieren <strong>16 pilas AA (8 packs)</strong>. Meta Fase 1: <strong>$50.320</strong>. Recaudado actual: <strong>$29.000 (58%)</strong>. Faltan sólo <strong>$21.320</strong>.</span>
-                </li>
-                <li>
-                  <span>🎙️</span>
-                  <span><strong>FASE 2 (Próximo Hito • 2 Micrófonos Salón Capilla):</strong> 2 micrófonos × 2 pilas = 4 pilas en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 2: <strong>$25.160</strong>.</span>
-                </li>
-                <li>
-                  <span>🕯️</span>
-                  <span><strong>FASE 3 (Hito Final • 2 Velas Eléctricas Adoración al Santísimo):</strong> 2 velas × 2 pilas = 4 pilas en uso continuo + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 3: <strong>$25.160</strong>.</span>
-                </li>
-                <li>
-                  <span>🔄</span>
-                  <span><strong>¿Por qué el doble de pilas?</strong> Para garantizar la continuidad litúrgica: mientras un juego de pilas está instalado y operando en los micrófonos o velas, el segundo juego de reemplazo permanece en el cargador de sacristía listo para intercambio inmediato.</span>
-                </li>
-                <li>
-                  <span>📦</span>
-                  <span><strong>Total Proyecto Consolidado:</strong> 16 + 8 + 8 = <strong>32 pilas AA en total (16 packs de 2 pilas Energizer 2000 mAh)</strong> = <strong>${formatCurrency(totalRepairCost)}</strong>.</span>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Sodimac Product Reference Bar -->
-            <div class="product-sodimac-bar" style="margin-top: 1rem;">
-              <div class="product-sodimac-info">
-                <div class="product-sodimac-icon">🔋</div>
-                <div class="product-sodimac-text">
-                  <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V (Meta: 32 pilas)</span>
-                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack (2 pilas) • ${totalQty} packs requeridos = 32 pilas AA en total (${formatCurrency(totalRepairCost)})</span>
-                </div>
-              </div>
-              <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
-                Verificar en Sodimac.cl ↗
-              </a>
-            </div>
-
-            <div class="funnel-panel-actions">
-              <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('causa')">
-                ← Volver a La Causa
-              </button>
-              <button type="button" class="btn-funnel-next" onclick="setFunnelStep('donar')">
-                Siguiente: ¿Cómo realizar tu aporte? →
-              </button>
-            </div>
-          </div>
-
-          <!-- Panel 3: Datos de Transferencia y Canales de Aporte -->
-          <div class="funnel-step-panel ${activeStep === 'donar' ? 'active' : ''}" data-step="donar">
-            <div class="funnel-panel-header">
-              <h4>3. Canales Oficiales para Donar</h4>
-              <p>Tu donación, cualquiera sea el monto, va 100% destinada a esta adquisición técnica.</p>
-            </div>
-
-            <!-- Embedded Instant Bank Transfer Card with Mercado Pago & QR -->
-            <div class="instant-bank-card">
-              <div class="instant-bank-header">
-                <span>🏦 Datos para Transferencia Bancaria Directa</span>
-                <span class="mercadopago-pill">MERCADO PAGO</span>
+            <!-- Panel 1: La Causa -->
+            <div class="funnel-step-panel ${activeStep === 'causa' ? 'active' : ''}" data-step="causa">
+              <div class="funnel-panel-header">
+                <h4>1. ¿Por qué necesitamos pilas recargables?</h4>
+                <p>Para garantizar una voz clara en las celebraciones litúrgicas y mantener iluminadas con devoción y seguridad las velas de la Capilla de Adoración Continua.</p>
               </div>
 
-              <div class="instant-bank-layout">
-                <div class="instant-bank-grid">
-                  <div class="instant-bank-row">
-                    <div>
-                      <span class="instant-bank-lbl">Banco Destino</span>
-                      <span class="instant-bank-val">MERCADO PAGO</span>
-                    </div>
-                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('MERCADO PAGO', this)">
-                      📋 Copiar
-                    </button>
-                  </div>
-
-                  <div class="instant-bank-row">
-                    <div>
-                      <span class="instant-bank-lbl">Cuenta Vista</span>
-                      <span class="instant-bank-val">1011953574</span>
-                    </div>
-                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('1011953574', this)">
-                      📋 Copiar
-                    </button>
-                  </div>
-
-                  <div class="instant-bank-row">
-                    <div>
-                      <span class="instant-bank-lbl">RUT</span>
-                      <span class="instant-bank-val">14.148.009-k</span>
-                    </div>
-                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('14148009k', this)">
-                      📋 Copiar
-                    </button>
-                  </div>
-
-                  <div class="instant-bank-row">
-                    <div>
-                      <span class="instant-bank-lbl">Correo Electrónico</span>
-                      <span class="instant-bank-val" style="font-size:0.75rem;">rodrigo.quezadab@gmail.com</span>
-                    </div>
-                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('rodrigo.quezadab@gmail.com', this)">
-                      📋 Copiar
-                    </button>
-                  </div>
-
-                  <div class="instant-bank-row" style="grid-column: 1 / -1; border-left: 3px solid #009ee3;">
-                    <div>
-                      <span class="instant-bank-lbl">Asunto / Glosa de Transferencia</span>
-                      <span class="instant-bank-val" style="color: #0284c7; font-weight: 700;">Parroquia</span>
-                    </div>
-                    <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia', this)">
-                      📋 Copiar Glosa
-                    </button>
-                  </div>
+              <div class="funnel-reasons-grid">
+                <div class="funnel-reason-card">
+                  <div class="reason-icon">🎙️</div>
+                  <h5>Audio Continuo en Micrófonos SKP UHF</h5>
+                  <p>Las pilas desechables pierden voltaje sin previo aviso. Las recargables garantizan carga completa para los 4 micrófonos SKP UHF 600 PRO del Templo y los 2 de la Capilla.</p>
                 </div>
 
-                <!-- QR Code Box -->
-                <div class="instant-bank-qr-box">
-                  <div class="instant-qr-wrapper">
-                    <img src="assets/qr-mercadopago.svg" alt="QR Mercado Pago Donaciones" width="120" height="120" class="instant-qr-img">
+                <div class="funnel-reason-card">
+                  <div class="reason-icon">🕯️</div>
+                  <h5>Adoración Eucarística Continua</h5>
+                  <p>Mantiene permanentemente iluminadas las 2 velas eléctricas ante el Santísimo Sacramento con rotación segura y sin interrupciones.</p>
+                </div>
+
+                <div class="funnel-reason-card">
+                  <div class="reason-icon">💰</div>
+                  <h5>Ahorro Parroquial Permanente</h5>
+                  <p>Comprar pilas alcalinas semanalmente es un gasto recurrente elevado. Con un solo aporte dotamos a la parroquia de energía para más de 1.000 recargas.</p>
+                </div>
+
+                <div class="funnel-reason-card">
+                  <div class="reason-icon">🌱</div>
+                  <h5>Cuidado de la Creación</h5>
+                  <p>Evitamos desechar cientos de pilas contaminantes al año en el sector, alineándonos con el compromiso de ecología integral.</p>
+                </div>
+              </div>
+
+              <div class="funnel-panel-actions">
+                <button type="button" class="btn-funnel-next" onclick="setFunnelStep('presupuesto')">
+                  Siguiente: Ver cómo se calculó la meta (${formatCurrency(totalRepairCost)}) →
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel 2: Presupuesto y Cotización Técnica -->
+            <div class="funnel-step-panel ${activeStep === 'presupuesto' ? 'active' : ''}" data-step="presupuesto">
+              <div class="funnel-panel-header">
+                <h4>2. Cálculo Técnico Transparente de la Meta (${formatCurrency(totalRepairCost)})</h4>
+                <p>Así definimos el presupuesto exacto sin costos ocultos:</p>
+              </div>
+
+              <div class="tech-calc-box">
+                <ul class="tech-calc-list">
+                  <li style="border-left: 3px solid #16a34a; padding-left: 0.75rem; background: rgba(22, 163, 74, 0.04);">
+                    <span>🎯</span>
+                    <span><strong>FASE 1 (PRIORIDAD ACTUAL • 4 Micrófonos Templo Mayor):</strong> 4 micrófonos × 2 pilas = 8 pilas en uso simultáneo en el presbiterio. Con el sistema de relevo continuo (el doble para tener siempre pilas cargando en sacristía), se requieren <strong>16 pilas AA (8 packs)</strong>. Meta Fase 1: <strong>$50.320</strong>. Recaudado actual: <strong>$29.000 (58%)</strong>. Faltan sólo <strong>$21.320</strong>.</span>
+                  </li>
+                  <li>
+                    <span>🎙️</span>
+                    <span><strong>FASE 2 (Próximo Hito • 2 Micrófonos Salón Capilla):</strong> 2 micrófonos × 2 pilas = 4 pilas en uso + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 2: <strong>$25.160</strong>.</span>
+                  </li>
+                  <li>
+                    <span>🕯️</span>
+                    <span><strong>FASE 3 (Hito Final • 2 Velas Eléctricas Adoración al Santísimo):</strong> 2 velas × 2 pilas = 4 pilas en uso continuo + 4 en relevo = <strong>8 pilas AA (4 packs)</strong>. Meta Fase 3: <strong>$25.160</strong>.</span>
+                  </li>
+                  <li>
+                    <span>🔄</span>
+                    <span><strong>¿Por qué el doble de pilas?</strong> Para garantizar la continuidad litúrgica: mientras un juego de pilas está instalado y operando en los micrófonos o velas, el segundo juego de reemplazo permanece en el cargador de sacristía listo para intercambio inmediato.</span>
+                  </li>
+                  <li>
+                    <span>📦</span>
+                    <span><strong>Total Proyecto Consolidado:</strong> 16 + 8 + 8 = <strong>32 pilas AA en total (16 packs de 2 pilas Energizer 2000 mAh)</strong> = <strong>${formatCurrency(totalRepairCost)}</strong>.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="product-sodimac-bar" style="margin-top: 1rem;">
+                <div class="product-sodimac-info">
+                  <div class="product-sodimac-icon">🔋</div>
+                  <div class="product-sodimac-text">
+                    <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V (Meta: 32 pilas)</span>
+                    <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack (2 pilas) • ${totalQty} packs requeridos = 32 pilas AA en total (${formatCurrency(totalRepairCost)})</span>
                   </div>
-                  <div class="instant-qr-caption">
-                    <span>📱 Escanea para transferir con <strong>Mercado Pago</strong> o tu App de Banco</span>
+                </div>
+                <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
+                  Verificar en Sodimac.cl ↗
+                </a>
+              </div>
+
+              <div class="funnel-panel-actions">
+                <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('causa')">
+                  ← Volver a La Causa
+                </button>
+                <button type="button" class="btn-funnel-next" onclick="setFunnelStep('donar')">
+                  Siguiente: ¿Cómo realizar tu aporte? →
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel 3: Datos de Transferencia y Canales de Aporte -->
+            <div class="funnel-step-panel ${activeStep === 'donar' ? 'active' : ''}" data-step="donar">
+              <div class="funnel-panel-header">
+                <h4>3. Canales Oficiales para Donar</h4>
+                <p>Tu donación, cualquiera sea el monto, va 100% destinada a esta adquisición técnica.</p>
+              </div>
+
+              <div class="instant-bank-card">
+                <div class="instant-bank-header">
+                  <span>🏦 Datos para Transferencia Bancaria Directa</span>
+                  <span class="mercadopago-pill">MERCADO PAGO</span>
+                </div>
+
+                <div class="instant-bank-layout">
+                  <div class="instant-bank-grid">
+                    <div class="instant-bank-row">
+                      <div>
+                        <span class="instant-bank-lbl">Banco Destino</span>
+                        <span class="instant-bank-val">MERCADO PAGO</span>
+                      </div>
+                      <button type="button" class="btn-instant-copy" onclick="copyDonationField('MERCADO PAGO', this)">
+                        📋 Copiar
+                      </button>
+                    </div>
+
+                    <div class="instant-bank-row">
+                      <div>
+                        <span class="instant-bank-lbl">Cuenta Vista</span>
+                        <span class="instant-bank-val">1011953574</span>
+                      </div>
+                      <button type="button" class="btn-instant-copy" onclick="copyDonationField('1011953574', this)">
+                        📋 Copiar
+                      </button>
+                    </div>
+
+                    <div class="instant-bank-row">
+                      <div>
+                        <span class="instant-bank-lbl">RUT</span>
+                        <span class="instant-bank-val">14.148.009-k</span>
+                      </div>
+                      <button type="button" class="btn-instant-copy" onclick="copyDonationField('14148009k', this)">
+                        📋 Copiar
+                      </button>
+                    </div>
+
+                    <div class="instant-bank-row">
+                      <div>
+                        <span class="instant-bank-lbl">Correo Electrónico</span>
+                        <span class="instant-bank-val" style="font-size:0.75rem;">rodrigo.quezadab@gmail.com</span>
+                      </div>
+                      <button type="button" class="btn-instant-copy" onclick="copyDonationField('rodrigo.quezadab@gmail.com', this)">
+                        📋 Copiar
+                      </button>
+                    </div>
+
+                    <div class="instant-bank-row" style="grid-column: 1 / -1; border-left: 3px solid #009ee3;">
+                      <div>
+                        <span class="instant-bank-lbl">Asunto / Glosa de Transferencia</span>
+                        <span class="instant-bank-val" style="color: #0284c7; font-weight: 700;">Parroquia</span>
+                      </div>
+                      <button type="button" class="btn-instant-copy" onclick="copyDonationField('Parroquia', this)">
+                        📋 Copiar Glosa
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="instant-bank-qr-box">
+                    <div class="instant-qr-wrapper">
+                      <img src="assets/qr-mercadopago.svg" alt="QR Mercado Pago Donaciones" width="120" height="120" class="instant-qr-img">
+                    </div>
+                    <div class="instant-qr-caption">
+                      <span>📱 Escanea para transferir con <strong>Mercado Pago</strong> o tu App de Banco</span>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <div class="active-actions-row" style="margin-top: 1rem;">
+                <a href="https://wa.me/56933484878?text=${encodeURIComponent('Hola Parroquia San Patricio, deseo avisar una donación para las pilas recargables de los micrófonos.')}" target="_blank" class="btn-cta-whatsapp">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                  <span>Avisar Donación por WhatsApp</span>
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="promptQuickDonation('${repair.id}')">
+                  + Registrar Aporte Recibido
+                </button>
+              </div>
+
+              <div class="funnel-panel-actions">
+                <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('presupuesto')">
+                  ← Volver al Cálculo de la Meta
+                </button>
+              </div>
             </div>
+          </section>
+        </article>
 
-            <!-- Botones de Acción de Donación -->
-            <div class="active-actions-row" style="margin-top: 1rem;">
-              <a href="https://wa.me/56933484878?text=${encodeURIComponent('Hola Parroquia San Patricio, deseo avisar una donación para las pilas recargables de los micrófonos.')}" target="_blank" class="btn-cta-whatsapp">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
-                <span>Avisar Donación por WhatsApp</span>
-              </a>
-              <button type="button" class="btn btn-secondary" onclick="promptQuickDonation('${repair.id}')">
-                + Registrar Aporte Recibido
-              </button>
-            </div>
+        <div class="project-details-footer-bar">
+          <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>← Volver a Proyectos Parroquiales</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
 
-            <div class="funnel-panel-actions">
-              <button type="button" class="btn-funnel-prev" onclick="setFunnelStep('presupuesto')">
-                ← Volver al Cálculo de la Meta
-              </button>
-            </div>
-          </div>
-        </section>
-      </article>
-      `;
-    });
-
-    // =========================================================================
-    // PROYECTO FUTURO DESTACADO: Iluminación Comedor Parroquial (10 Paneles LED)
-    // =========================================================================
-    const comedorRepair = appData.repairs.find(r => r.id === 'rep_comedor_iluminacion');
-    const searchQuery = (searchInput?.value || '').trim().toLowerCase();
-    const matchesSearch = !searchQuery ||
-      (comedorRepair && (
-        comedorRepair.title.toLowerCase().includes(searchQuery) ||
-        comedorRepair.description.toLowerCase().includes(searchQuery) ||
-        (comedorRepair.place || '').toLowerCase().includes(searchQuery) ||
-        (comedorRepair.area || '').toLowerCase().includes(searchQuery) ||
-        (comedorRepair.specialty || '').toLowerCase().includes(searchQuery) ||
-        (comedorRepair.items || []).some(itm => (itm.name || '').toLowerCase().includes(searchQuery))
-      ));
-    const matchesPlace = currentFilterPlace === 'all' || (comedorRepair && (comedorRepair.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
-    const matchesArea = currentFilterArea === 'all' || (comedorRepair && (comedorRepair.area || '').toLowerCase() === currentFilterArea.toLowerCase());
-
-    if (comedorRepair && matchesSearch && matchesPlace && matchesArea) {
-      const comedorItems = comedorRepair.items || [];
-      let comedorCost = 0;
-      comedorItems.forEach(itm => {
-        comedorCost += (Number(itm.price) || 0) * (Number(itm.qty) || 1);
-      });
-
-      html += `
-        <!-- Banner de Proyecto Futuro / Próxima Iniciativa Parroquial -->
-        <div class="future-project-banner">
-          <div class="future-project-badge">
-            <span class="pulse-beacon" style="background:#eab308; box-shadow:0 0 0 0 rgba(234, 179, 8, 0.7);"></span>
-            <span>PROYECTO FUTURO • EN PLANIFICACIÓN</span>
-          </div>
-          <h3 class="future-project-heading">Próxima Iniciativa Parroquial: Iluminación Comedor</h3>
-          <p class="future-project-sub">
-            Iniciativa técnica programada para ejecutarse una vez completada la meta prioritaria de pilas recargables para micrófonos y adoración continua.
-          </p>
+  // 2. SPECIFIC VIEW FOR COMEDOR PROJECT
+  if (repair.id === 'rep_comedor_iluminacion') {
+    return `
+      <div class="project-details-view">
+        <div class="project-details-header-bar">
+          <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>← Volver a Proyectos Parroquiales</span>
+          </button>
+          <div class="details-status-pill future">⏳ Proyecto Futuro • En Planificación</div>
         </div>
 
-        <article class="featured-future-card" data-id="${comedorRepair.id}">
+        <article class="featured-future-card in-details-view" data-id="${repair.id}">
           <div class="card-top">
             <div class="hierarchy-tags">
               <span class="tag tag-place">
@@ -2216,25 +2019,18 @@ function renderRepairsGrid() {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
                 Comedor Parroquial
               </span>
-              <span class="tag tag-specialty">
-                ⚡ Electricidad e Iluminación
-              </span>
-              <span class="tag tag-status-planificacion">
-                ⏳ En Planificación
-              </span>
-              <span class="tag tag-priority-alta">
-                ALTA
-              </span>
+              <span class="tag tag-specialty">⚡ Electricidad e Iluminación</span>
+              <span class="tag tag-status-planificacion">⏳ En Planificación</span>
+              <span class="tag tag-priority-alta">ALTA</span>
             </div>
           </div>
 
           <div class="card-main-body">
-            <h3 class="repair-title">${escapeHtml(comedorRepair.title)}</h3>
+            <h2 class="repair-title" style="font-size: 1.45rem;">${escapeHtml(repair.title)}</h2>
             <p class="repair-lead-text">
               Renovación integral de la iluminación del <strong>Comedor Parroquial</strong>, espacio de uso comunitario para encuentros pastorales, convivencias fraternas y reuniones comunitarias. Se reemplazarán las luminarias actuales por <strong>10 paneles redondos LED de 20W sobrepuestos</strong> en cielo para una luz blanca fría homogénea, confortable y de bajo consumo eléctrico.
             </p>
 
-            <!-- Ficha Técnica del Panel LED en Sodimac -->
             <div class="future-item-card">
               <div class="future-item-icon">💡</div>
               <div class="future-item-body">
@@ -2258,17 +2054,16 @@ function renderRepairsGrid() {
               </div>
             </div>
 
-            <!-- Resumen de Costos y Planificación -->
             <div class="future-meta-grid">
               <div class="future-meta-box">
                 <span class="future-meta-lbl">Presupuesto Materiales</span>
-                <span class="future-meta-val">${formatCurrency(comedorCost)}</span>
+                <span class="future-meta-val">${formatCurrency(totalRepairCost)}</span>
                 <span class="future-meta-sub">10 paneles LED sobrepuestos</span>
               </div>
               <div class="future-meta-box">
                 <span class="future-meta-lbl">Mano de Obra</span>
                 <span class="future-meta-val" style="color:#16a34a;">$0 (Voluntariado)</span>
-                <span class="future-meta-sub">Instalación técnica fraterna</span>
+                <span class="future-meta-sub">Instalación técnica comunitaria</span>
               </div>
               <div class="future-meta-box">
                 <span class="future-meta-lbl">Estado Campaña</span>
@@ -2278,28 +2073,507 @@ function renderRepairsGrid() {
             </div>
           </div>
 
-          <!-- Acciones del Proyecto Futuro -->
           <div class="future-card-actions">
-            <button type="button" class="btn-activate-future" onclick="promoteToActive('${comedorRepair.id}')" title="Activar anticipadamente e iniciar recaudación">
+            <button type="button" class="btn-activate-future" onclick="promoteToActive('${repair.id}')" title="Activar anticipadamente e iniciar recaudación">
               🚀 Activar Campaña Ahora
             </button>
-            <button type="button" class="btn-view-future-sheet" onclick="editRepair('${comedorRepair.id}')" title="Ver ficha técnica completa">
+            <button type="button" class="btn-view-future-sheet" onclick="editRepair('${repair.id}')" title="Ver ficha técnica completa">
               📋 Ver Ficha Técnica / Editar
+            </button>
+          </div>
+        </article>
+
+        <div class="project-details-footer-bar">
+          <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>← Volver a Proyectos Parroquiales</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. GENERIC DETAILED VIEW FOR OTHER REPAIRS
+  return `
+    <div class="project-details-view">
+      <div class="project-details-header-bar">
+        <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>← Volver a Proyectos Parroquiales</span>
+        </button>
+        <div class="details-status-pill ${repair.status === 'planificacion' ? 'future' : ''}">
+          ${statusLabels[repair.status] || 'En Planificación'}
+        </div>
+      </div>
+
+      <article class="featured-future-card in-details-view" data-id="${repair.id}">
+        <div class="card-top">
+          <div class="hierarchy-tags">
+            <span class="tag tag-place">${escapeHtml(repair.place || 'Sector')}</span>
+            <span class="tag tag-area">${escapeHtml(repair.area || 'Espacio')}</span>
+            <span class="tag tag-specialty">${escapeHtml(repair.specialty || 'General')}</span>
+            <span class="tag tag-status-${escapeHtml(repair.status || 'planificacion')}">${escapeHtml(statusLabels[repair.status] || 'En Planificación')}</span>
+          </div>
+        </div>
+
+        <div class="card-main-body">
+          <h2 class="repair-title" style="font-size: 1.45rem;">${escapeHtml(repair.title)}</h2>
+          ${repair.description ? `<p class="repair-description" style="white-space: pre-line; line-height: 1.5; font-size: 0.9rem;">${escapeHtml(repair.description)}</p>` : ''}
+
+          <h4 style="font-family: var(--font-heading); font-size: 1rem; margin-top: 1rem;">Materiales y Equipamiento Cotizado:</h4>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            ${items.map(itm => `
+              <div class="future-item-card" style="margin: 0.2rem 0;">
+                <div class="future-item-icon">📦</div>
+                <div class="future-item-body">
+                  <div class="future-item-title-row">
+                    <span class="future-item-name">${escapeHtml(itm.name)}</span>
+                    <span class="future-item-qty-badge">${itm.qty || 1} unid.</span>
+                  </div>
+                  <div class="future-item-sku-row">
+                    <span><strong>Precio:</strong> ${formatCurrency(itm.price || 0)} c/u</span>
+                    <span class="future-item-total"><strong>Subtotal:</strong> ${formatCurrency((Number(itm.price) || 0) * (Number(itm.qty) || 1))}</span>
+                  </div>
+                </div>
+                ${itm.url ? `
+                  <div class="future-item-action">
+                    <a href="${itm.url}" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac" style="white-space:nowrap;">
+                      Ver en Tienda ↗
+                    </a>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="future-meta-grid" style="margin-top: 1.25rem;">
+            <div class="future-meta-box">
+              <span class="future-meta-lbl">Presupuesto Materiales</span>
+              <span class="future-meta-val">${formatCurrency(repairMaterialsCost)}</span>
+            </div>
+            ${repair.hasLabor ? `
+              <div class="future-meta-box">
+                <span class="future-meta-lbl">Mano de Obra</span>
+                <span class="future-meta-val">${formatCurrency(laborCost)}</span>
+              </div>
+            ` : ''}
+            <div class="future-meta-box">
+              <span class="future-meta-lbl">Presupuesto Total</span>
+              <span class="future-meta-val" style="color: #15803d;">${formatCurrency(totalRepairCost)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="future-card-actions">
+          ${repair.status === 'planificacion' ? `
+            <button type="button" class="btn-activate-future" onclick="promoteToActive('${repair.id}')">
+              🚀 Activar Proyecto Ahora
+            </button>
+          ` : `
+            <button type="button" class="btn btn-primary btn-sm" onclick="openDonationModal('${repair.id}')" style="background: linear-gradient(135deg, #15803d, #16a34a);">
+              Donar a este Proyecto
+            </button>
+          `}
+          <button type="button" class="btn-view-future-sheet" onclick="editRepair('${repair.id}')">
+            📋 Editar Ficha Técnica
+          </button>
+        </div>
+      </article>
+
+      <div class="project-details-footer-bar">
+        <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>← Volver a Proyectos Parroquiales</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+
+function renderRepairsGrid() {
+  const filtered = getFilteredRepairs();
+  const activePlaceName = currentFilterPlace === 'all' ? 'Cualquier Sector' : currentFilterPlace;
+
+  const statusLabels = {
+    planificacion: 'En Planificación',
+    recaudacion: 'En Recaudación',
+    compras: 'En Compras',
+    ejecucion: 'En Ejecución',
+    completado: 'Completado'
+  };
+
+  // If a specific project is selected for detailed view, render its comprehensive view
+  if (activeDetailsProjectId) {
+    const detailRepair = appData.repairs.find(r => r.id === activeDetailsProjectId);
+    if (detailRepair) {
+      repairsContainer.className = 'repairs-grid';
+      repairsContainer.innerHTML = renderProjectDetailsView(detailRepair, statusLabels);
+      return;
+    } else {
+      activeDetailsProjectId = null;
+    }
+  }
+
+  const backlogBannerHtml = `
+    <div class="backlog-banner">
+      <div class="backlog-banner-icon">📋</div>
+      <div class="backlog-banner-body">
+        <div class="backlog-banner-title">Banco de Proyectos Técnicos Parroquiales (Backlog / Por Realizar)</div>
+        <div class="backlog-banner-desc">
+          Estas iniciativas técnicas e infraestructurales ya cuentan con su diagnóstico, cotizaciones y materiales especificados. Se encuentran en espera para focalizar los esfuerzos comunitarios en la compra activa de pilas recargables para micrófonos y adoración continua.
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Quick Add HTML for List View or Location View
+  const quickAddHtml = `
+    <div class="quick-add-bar">
+      <div class="quick-add-header">
+        <span class="quick-add-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Creación Rápida en <strong>${escapeHtml(activePlaceName)}</strong>
+        </span>
+        <span class="quick-add-hint">Registra proyectos técnicos parroquiales para presupuestar y recaudar</span>
+      </div>
+      <form class="quick-add-inputs" onsubmit="handleQuickAdd(event)">
+        ${currentFilterPlace === 'all' ? `
+          <input type="text" id="quick-input-place" class="form-input" placeholder="Sector (ej: Templo Mayor)..." list="places-list" value="Templo Mayor" required style="font-size:0.85rem;">
+        ` : ''}
+        <input type="text" id="quick-input-title" class="form-input" placeholder="Proyecto técnico (ej: Nuevos micrófonos inalámbricos)..." required style="font-size:0.85rem;">
+        <input type="text" id="quick-input-area" class="form-input" placeholder="Espacio (ej: Altar, Nave Central)..." list="areas-list" value="${currentFilterArea !== 'all' ? escapeHtml(currentFilterArea) : ''}" required style="font-size:0.85rem;">
+        <select id="quick-input-priority" class="form-select" style="font-size:0.85rem; min-width: 130px;">
+          <option value="alta" selected>Prioridad Alta</option>
+          <option value="urgente">🚨 Urgente (Falla activa)</option>
+          <option value="media">Prioridad Media</option>
+          <option value="baja">Prioridad Baja</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #15803d, #16a34a);">
+          + Crear Rápido
+        </button>
+      </form>
+    </div>
+  `;
+
+  if (filtered.length === 0) {
+    repairsContainer.className = 'repairs-container';
+    repairsContainer.innerHTML = `
+      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
+      ${currentViewMode === 'list' ? quickAddHtml : ''}
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-icon">${currentProjectSection === 'backlog' ? '📋' : '🍀'}</div>
+        <h3 style="font-size: 1.15rem; font-family: var(--font-heading);">${currentProjectSection === 'backlog' ? 'No hay proyectos en el backlog' : 'No hay proyectos activos'}</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 440px;">
+          ${searchQuery ? `No hay resultados para "${escapeHtml(searchQuery)}". Intenta con otra palabra clave o limpia los filtros.` : (currentProjectSection === 'backlog' ? 'Todas las iniciativas técnicas están actualmente activas o completadas.' : 'Actualmente no hay campañas en curso en este sector.')}
+        </p>
+        <button class="btn btn-primary btn-sm" onclick="openRepairModal()" style="background: linear-gradient(135deg, #15803d, #16a34a);">+ Nuevo Proyecto</button>
+      </div>
+    `;
+    return;
+  }
+
+  // LIST VIEW MODE (Compact Transparency Table)
+  if (currentViewMode === 'list') {
+    repairsContainer.className = 'repairs-container';
+    let rowsHtml = filtered.map(repair => {
+      const items = repair.items || [];
+      let matCost = 0;
+      let boughtCount = 0;
+      let totalQty = 0;
+      items.forEach(itm => {
+        const p = Number(itm.price) || 0;
+        const q = Number(itm.qty) || 1;
+        matCost += p * q;
+        totalQty += q;
+        if (itm.bought) boughtCount += q;
+      });
+      const labor = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
+      const total = matCost + labor;
+      const progressPct = totalQty > 0 ? Math.round((boughtCount / totalQty) * 100) : 0;
+      const raised = Number(repair.raisedAmount) || 0;
+      const fundingPct = total > 0 ? Math.min(100, Math.round((raised / total) * 100)) : 0;
+      const hasNotes = Boolean(repair.description && repair.description.trim() !== '');
+
+      return `
+        <tr class="repairs-list-row" onclick="navigateToProjectDetails('${repair.id}')" title="Haz clic para ver los detalles de este proyecto">
+          <td>
+            <span class="tag tag-priority-${repair.priority || 'media'}">
+              ${repair.priority ? repair.priority.toUpperCase() : 'MEDIA'}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+              <span class="tag tag-place">${escapeHtml(repair.place || 'Sector')}</span>
+              <span class="tag tag-area">${escapeHtml(repair.area || 'Espacio')}</span>
+            </div>
+          </td>
+          <td>
+            <div class="list-title-cell">
+              <span class="list-title-text">
+                ${escapeHtml(repair.title)}
+                ${hasNotes ? `<span class="list-notes-badge" title="Tiene bitácora técnica">📝 Bitácora</span>` : ''}
+              </span>
+              <div style="display: flex; gap: 0.3rem; align-items: center; margin-top: 0.2rem;">
+                <span class="tag tag-specialty" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">${escapeHtml(repair.specialty || 'General')}</span>
+                <span class="tag tag-status-${escapeHtml(repair.status || 'recaudacion')}" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">${escapeHtml(statusLabels[repair.status] || 'En Recaudación')}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="list-progress-wrapper" title="Recaudado: ${formatCurrency(raised)} de ${formatCurrency(total)}">
+              <div class="list-progress-text">
+                <span style="color: #4ade80; font-weight: 600;">${formatCurrency(raised)}</span>
+                <span style="color: var(--text-subtle);">${fundingPct}%</span>
+              </div>
+              <div class="card-mini-progress">
+                <div class="card-mini-progress-fill" style="width: ${fundingPct}%; background: ${fundingPct >= 100 ? '#22c55e' : 'linear-gradient(90deg, #16a34a, #eab308)'};"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="list-progress-wrapper">
+              <div class="list-progress-text">
+                <span>${items.length} mats</span>
+                <span style="font-weight:600;">${boughtCount}/${totalQty}</span>
+              </div>
+              <div class="card-mini-progress">
+                <div class="card-mini-progress-fill" style="width: ${progressPct}%;"></div>
+              </div>
+            </div>
+          </td>
+          <td class="num-col">
+            <span class="list-amount-text">${formatCurrency(total)}</span>
+          </td>
+          <td>
+            <div class="list-actions-cell" onclick="event.stopPropagation();">
+              ${repair.status === 'planificacion' ? `
+                <button class="btn-activate-project" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="promoteToActive('${repair.id}')" title="Activar proyecto e iniciar compras">
+                  🚀 Activar
+                </button>
+                <button class="card-manage-btn" onclick="navigateToProjectDetails('${repair.id}')" title="Entrar al proyecto">
+                  Ver
+                </button>
+              ` : `
+                <button class="btn-donate-card" style="padding: 0.28rem 0.55rem; font-size: 0.72rem;" onclick="openDonationModal('${repair.id}')" title="Aportar a este proyecto">
+                  Donar
+                </button>
+                <button class="card-manage-btn" onclick="navigateToProjectDetails('${repair.id}')" title="Entrar al proyecto">
+                  Ver
+                </button>
+              `}
+              <button class="icon-btn-ghost delete" title="Eliminar proyecto" onclick="deleteRepair('${repair.id}')" aria-label="Eliminar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    repairsContainer.innerHTML = `
+      ${currentProjectSection === 'backlog' ? backlogBannerHtml : ''}
+      ${quickAddHtml}
+      <div class="repairs-list-wrapper">
+        <table class="repairs-list-table">
+          <thead>
+            <tr>
+              <th style="width: 85px;">Prioridad</th>
+              <th style="width: 170px;">Ubicación</th>
+              <th>Proyecto / Especialidad</th>
+              <th style="width: 150px;">Recaudación</th>
+              <th style="width: 130px;">Materiales</th>
+              <th class="num-col" style="width: 110px;">Presupuesto</th>
+              <th style="width: 140px; text-align: right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+    return;
+  }
+
+  // GRID VIEW MODE: Summarized Cards & Future Project
+  repairsContainer.className = 'repairs-grid';
+
+  if (currentProjectSection === 'active') {
+    let html = `
+      <div class="active-campaign-banner" style="grid-column: 1 / -1;">
+        <div class="active-campaign-badge">
+          <span class="pulse-beacon"></span>
+          <span>PROYECTOS PARROQUIALES DESTACADOS</span>
+        </div>
+        <h2 class="active-campaign-title">Iniciativas Técnicas y Donaciones</h2>
+        <p class="active-campaign-subtitle">
+          Información resumida de los proyectos prioritarios. <strong>Haz clic en cualquier tarjeta</strong> para navegar a sus especificaciones técnicas, fotografías y medios de donación.
+        </p>
+      </div>
+    `;
+
+    const searchQuery = (searchInput?.value || '').trim().toLowerCase();
+
+    // 1. Summarized Card for Battery Project (rep_pilas_microfonos)
+    const pilasRepair = appData.repairs.find(r => r.id === 'rep_pilas_microfonos');
+    const matchesPilasSearch = !searchQuery || (pilasRepair && (
+      pilasRepair.title.toLowerCase().includes(searchQuery) ||
+      pilasRepair.description.toLowerCase().includes(searchQuery) ||
+      (pilasRepair.place || '').toLowerCase().includes(searchQuery) ||
+      (pilasRepair.area || '').toLowerCase().includes(searchQuery) ||
+      (pilasRepair.specialty || '').toLowerCase().includes(searchQuery) ||
+      (pilasRepair.items || []).some(itm => (itm.name || '').toLowerCase().includes(searchQuery))
+    ));
+    const matchesPilasPlace = currentFilterPlace === 'all' || (pilasRepair && (pilasRepair.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
+    const matchesPilasArea = currentFilterArea === 'all' || (pilasRepair && (pilasRepair.area || '').toLowerCase() === currentFilterArea.toLowerCase());
+
+    if (pilasRepair && matchesPilasSearch && matchesPilasPlace && matchesPilasArea) {
+      const raised = Number(pilasRepair.raisedAmount) || 0;
+      const p1Cost = 8 * 6290; // $50.320
+      const p1Pct = Math.min(100, Math.round((Math.min(raised, p1Cost) / p1Cost) * 100));
+      const p1Remaining = Math.max(0, p1Cost - Math.min(raised, p1Cost));
+      const totalCost = 16 * 6290; // $100.640
+
+      html += `
+        <!-- Tarjeta Resumida: Pilas Recargables (Campaña Activa) -->
+        <article class="project-summary-card active-campaign-card" onclick="navigateToProjectDetails('${pilasRepair.id}')" title="Haz clic para ver todos los detalles técnicos, fotos reales y formas de aportar">
+          <div class="summary-card-top">
+            <div class="hierarchy-tags">
+              <span class="tag tag-place">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                Templo Mayor & Capilla
+              </span>
+              <span class="tag tag-specialty">🎙️ Audio Litúrgico</span>
+              <span class="tag tag-status-compras">🟢 Campaña Activa</span>
+            </div>
+            <span class="summary-priority-badge priority-alta">ALTA</span>
+          </div>
+
+          <div class="summary-card-media">
+            <img src="assets/microfonos_templo_rack.jpg" alt="Rack con 4 micrófonos Templo Mayor" class="summary-card-img">
+            <div class="summary-media-badge">
+              <span class="pulse-beacon" style="width:7px; height:7px;"></span>
+              <span>Fase 1: 16 Pilas Templo Mayor (Prioridad Actual)</span>
+            </div>
+          </div>
+
+          <div class="summary-card-body">
+            <h3 class="summary-card-title">${escapeHtml(pilasRepair.title)}</h3>
+            <p class="summary-card-desc">
+              Dotación de 32 pilas AA recargables (16 packs) para 8 aparatos en rotación continua: 4 micrófonos Templo, 2 micrófonos Capilla y 2 velas de Adoración Continua al Santísimo.
+            </p>
+
+            <div class="summary-progress-box">
+              <div class="summary-progress-top">
+                <span class="summary-progress-lbl">Meta Fase 1 (Templo Mayor):</span>
+                <span class="summary-progress-val"><strong>${formatCurrency(raised)}</strong> de ${formatCurrency(p1Cost)} (<strong>${p1Pct}%</strong>)</span>
+              </div>
+              <div class="summary-progress-bar">
+                <div class="summary-progress-fill" style="width: ${p1Pct}%;"></div>
+              </div>
+              <div class="summary-progress-sub">
+                <span>Faltan <strong>${formatCurrency(p1Remaining)}</strong> para cumplir Fase 1 • Meta Global: ${formatCurrency(totalCost)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card-footer">
+            <span class="summary-badge-count">🔋 8 aparatos • 32 pilas (16 packs)</span>
+            <button type="button" class="btn-summary-action" onclick="event.stopPropagation(); navigateToProjectDetails('${pilasRepair.id}')">
+              Ver Detalles & Donar →
             </button>
           </div>
         </article>
       `;
     }
 
+    // 2. Summarized Card for Dining Room Lighting (rep_comedor_iluminacion)
+    const comedorRepair = appData.repairs.find(r => r.id === 'rep_comedor_iluminacion');
+    const matchesComedorSearch = !searchQuery || (comedorRepair && (
+      comedorRepair.title.toLowerCase().includes(searchQuery) ||
+      comedorRepair.description.toLowerCase().includes(searchQuery) ||
+      (comedorRepair.place || '').toLowerCase().includes(searchQuery) ||
+      (comedorRepair.area || '').toLowerCase().includes(searchQuery) ||
+      (comedorRepair.specialty || '').toLowerCase().includes(searchQuery) ||
+      (comedorRepair.items || []).some(itm => (itm.name || '').toLowerCase().includes(searchQuery))
+    ));
+    const matchesComedorPlace = currentFilterPlace === 'all' || (comedorRepair && (comedorRepair.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
+    const matchesComedorArea = currentFilterArea === 'all' || (comedorRepair && (comedorRepair.area || '').toLowerCase() === currentFilterArea.toLowerCase());
+
+    if (comedorRepair && matchesComedorSearch && matchesComedorPlace && matchesComedorArea) {
+      const comedorItems = comedorRepair.items || [];
+      let comedorCost = 0;
+      comedorItems.forEach(itm => {
+        comedorCost += (Number(itm.price) || 0) * (Number(itm.qty) || 1);
+      });
+
+      html += `
+        <!-- Tarjeta Resumida: Iluminación Comedor (Proyecto Futuro) -->
+        <article class="project-summary-card future-project-card" onclick="navigateToProjectDetails('${comedorRepair.id}')" title="Haz clic para ver la ficha técnica, cotización y presupuesto de los 10 paneles LED">
+          <div class="summary-card-top">
+            <div class="hierarchy-tags">
+              <span class="tag tag-place">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                Casa Sacerdotal y Salones
+              </span>
+              <span class="tag tag-area">Comedor Parroquial</span>
+              <span class="tag tag-specialty">⚡ Electricidad e Iluminación</span>
+            </div>
+            <span class="summary-status-badge future-badge">⏳ Proyecto Futuro</span>
+          </div>
+
+          <div class="summary-card-media future-media">
+            <div class="summary-future-icon-wrap">
+              <span class="future-big-icon">💡</span>
+              <div class="future-media-badge-text">
+                <span>10 Paneles Redondos LED AD 20W Sobrepuestos</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card-body">
+            <h3 class="summary-card-title">${escapeHtml(comedorRepair.title)}</h3>
+            <p class="summary-card-desc">
+              Renovación integral de luminarias por 10 paneles LED sobrepuestos de 20W luz fría para el comedor comunitario. Próxima iniciativa en cola tras culminar la campaña de pilas.
+            </p>
+
+            <div class="summary-budget-box">
+              <div class="summary-budget-row">
+                <span class="summary-budget-lbl">Presupuesto Materiales:</span>
+                <span class="summary-budget-val">${formatCurrency(comedorCost)}</span>
+              </div>
+              <div class="summary-budget-row">
+                <span class="summary-budget-lbl">Costo por Panel:</span>
+                <span class="summary-budget-sub">$3.990 c/u (SKU Sodimac: 114110551)</span>
+              </div>
+              <div class="summary-budget-row">
+                <span class="summary-budget-lbl">Estado Campaña:</span>
+                <span class="summary-budget-state">En Planificación ($0 recaudado)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card-footer">
+            <span class="summary-badge-count">💡 10 paneles LED AD 20W</span>
+            <button type="button" class="btn-summary-action future-cta" onclick="event.stopPropagation(); navigateToProjectDetails('${comedorRepair.id}')">
+              Ver Ficha Técnica →
+            </button>
+          </div>
+        </article>
+      `;
+    }
+
+    const backlogCount = appData.repairs.filter(r => (r.status || '') === 'planificacion' && r.id !== 'rep_comedor_iluminacion').length;
     html += `
       <!-- Backlog Invitation Bar -->
-      <div class="backlog-peek-box">
+      <div class="backlog-peek-box" style="grid-column: 1 / -1;">
         <div class="backlog-peek-info">
           <span class="backlog-peek-title">📋 ¿Deseas conocer otras iniciativas de la parroquia?</span>
-          <span class="backlog-peek-desc">Existen otros 8 proyectos futuros en estudio técnico (iluminación exterior, sensores, climatización, etc.)</span>
+          <span class="backlog-peek-desc">Existen otras ${backlogCount} iniciativas técnicas en estudio (sensores PIR, proyectores LED exteriores, ventilación, etc.)</span>
         </div>
         <button type="button" class="btn-peek-backlog" onclick="switchProjectSection('backlog')">
-          Ver Backlog Parroquial (8 proyectos) →
+          Ver Backlog Parroquial (${backlogCount} iniciativas) →
         </button>
       </div>
     `;
@@ -2310,12 +2584,14 @@ function renderRepairsGrid() {
 
   // BACKLOG VIEW MODE
   let html = `
-    <div class="backlog-return-bar">
+    <div class="backlog-return-bar" style="grid-column: 1 / -1;">
       <button type="button" class="btn-return-active" onclick="switchProjectSection('active')">
-        ← Volver al Proyecto Activo (Pilas Micrófonos y Adoración)
+        ← Volver a Proyectos Destacados (Pilas Micrófonos y Comedor)
       </button>
     </div>
-    ${backlogBannerHtml}
+    <div style="grid-column: 1 / -1;">
+      ${backlogBannerHtml}
+    </div>
   `;
 
   filtered.forEach(repair => {
@@ -2334,16 +2610,14 @@ function renderRepairsGrid() {
 
     const laborCost = repair.hasLabor ? (Number(repair.laborCost) || 0) : 0;
     const totalRepairCost = repairMaterialsCost + laborCost;
-    const progressPct = totalQty > 0 ? Math.round((repairBoughtCount / totalQty) * 100) : 0;
     const isCompleted = totalQty > 0 && repairBoughtCount === totalQty;
     const hasNotes = Boolean(repair.description && repair.description.trim() !== '');
-
     const raised = Number(repair.raisedAmount) || 0;
     const fundingPct = totalRepairCost > 0 ? Math.min(100, Math.round((raised / totalRepairCost) * 100)) : 0;
     const remainingNeeded = Math.max(0, totalRepairCost - raised);
 
     html += `
-      <article class="repair-card ${isCompleted ? 'is-complete-card' : ''}" data-id="${repair.id}" onclick="editRepair('${repair.id}')" title="Haz clic para entrar al proyecto y ver/gestionar sus especificaciones técnicas">
+      <article class="repair-card ${isCompleted ? 'is-complete-card' : ''}" data-id="${repair.id}" onclick="navigateToProjectDetails('${repair.id}')" title="Haz clic para ver todos los detalles y especificaciones técnicas de este proyecto">
         <div class="card-top">
           <div class="hierarchy-tags">
             <span class="tag tag-place">
@@ -2380,7 +2654,6 @@ function renderRepairsGrid() {
           ${repair.description ? `<p class="repair-description">${escapeHtml(repair.description)}</p>` : ''}
         </div>
 
-        <!-- Prominent Goal Amount Box -->
         <div class="card-meta-highlight-box">
           <div class="meta-highlight-top">
             <span class="meta-highlight-title-label">
@@ -2409,7 +2682,6 @@ function renderRepairsGrid() {
           </div>
         </div>
 
-        <!-- Project Quick Stats Summary -->
         <div class="card-stats-summary">
           <div class="card-stat-pill ${isCompleted ? 'pill-completed' : ''}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -2424,13 +2696,12 @@ function renderRepairsGrid() {
           ` : ''}
         </div>
 
-        <!-- Action Row -->
         <div class="card-donation-row" onclick="event.stopPropagation();">
           <button type="button" class="btn-activate-project" onclick="promoteToActive('${repair.id}')" title="Activar esta iniciativa para comenzar su recaudación y compras">
-            🚀 Activar como Proyecto Activo
+            🚀 Activar
           </button>
-          <button type="button" class="card-manage-btn" onclick="editRepair('${repair.id}')" style="font-size:0.75rem; padding: 0.35rem 0.65rem;" title="Ver y editar ficha técnica">
-            Ver Ficha
+          <button type="button" class="card-manage-btn" onclick="navigateToProjectDetails('${repair.id}')" style="font-size:0.75rem; padding: 0.35rem 0.65rem;" title="Ver ficha técnica completa">
+            Ver Detalles →
           </button>
         </div>
       </article>
