@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v9';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v10';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -430,7 +430,7 @@ const SAMPLE_DATA = [
     area: 'Sonido Litúrgico y Adoración Continua',
     specialty: 'Audio y Velas Litúrgicas',
     status: 'compras',
-    title: 'Compra de Pilas Recargables AA Energizer para Micrófonos y Velas de Adoración al Santísimo',
+    title: 'Compra de 32 Pilas Recargables AA Energizer (16 Packs) para Micrófonos y Velas de Adoración',
     description: '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.',
     priority: 'alta',
     raisedAmount: 29000,
@@ -440,7 +440,7 @@ const SAMPLE_DATA = [
     items: [
       {
         id: 'itm_pilas_1',
-        name: 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac',
+        name: 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac (16 packs = 32 pilas AA)',
         price: 6290,
         qty: 16,
         url: 'https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368',
@@ -983,12 +983,13 @@ function loadData() {
           } else {
             r.status = 'compras';
             r.raisedAmount = 29000;
-            r.title = 'Compra de Pilas Recargables AA Energizer para Micrófonos y Velas de Adoración al Santísimo';
+            r.title = 'Compra de 32 Pilas Recargables AA Energizer (16 Packs) para Micrófonos y Velas de Adoración';
             r.place = 'Templo Mayor y Capilla de Adoración';
             r.area = 'Sonido Litúrgico y Adoración Continua';
             r.specialty = 'Audio y Velas Litúrgicas';
             r.description = '[29/10/2026 07:15] ⏱️ Requerimiento actualizado: Se integra el abastecimiento energético tanto para los micrófonos litúrgicos (Templo Mayor y Salón Capilla) como para las 2 velas eléctricas de la Capilla de Adoración al Santísimo.\n\n[29/10/2026 07:15] 📏 Cálculo de necesidad en uso simultáneo:\n• 4 micrófonos en el Templo Mayor (2 pilas c/u) = 8 pilas AA\n• 2 micrófonos en el Salón Capilla (2 pilas c/u) = 4 pilas AA\n• 2 velas eléctricas en Adoración al Santísimo (2 pilas c/u) = 4 pilas AA\n• Total en uso simultáneo continuo = 16 pilas AA en operación\n• Sistema de rotación y relevo (doble juego para recarga en sacristía) = 16 × 2 = 32 pilas AA en total\n• Formato de compra (Pack Energizer 2 pilas) = 32 ÷ 2 = 16 packs requeridos\n\n[29/10/2026 07:15] 💡 Elección Técnica: Pilas recargables Energizer AA 2000 mAh 1.2V (SKU Sodimac: 110228362). A $6.290 cada pack = Meta total requerida de $100.640.';
             if (r.items && r.items[0]) {
+              r.items[0].name = 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac (16 packs = 32 pilas AA)';
               r.items[0].qty = 16;
             }
           }
@@ -1577,9 +1578,9 @@ function renderRepairsGrid() {
           <span class="pulse-beacon"></span>
           <span>CAMPAÑA PARROQUIAL ACTIVA</span>
         </div>
-        <h2 class="active-campaign-title">Pilas Recargables para Micrófonos y Adoración al Santísimo</h2>
+        <h2 class="active-campaign-title">32 Pilas Recargables AA para Micrófonos y Adoración al Santísimo</h2>
         <p class="active-campaign-subtitle">
-          Iniciativa prioritaria para asegurar el audio en las misas y la iluminación continua de las velas en la Capilla de Adoración.
+          Campaña prioritaria para proveer <strong>32 pilas AA recargables (16 packs de 2 unidades)</strong>: audio continuo en las misas e iluminación permanente de las velas de Adoración al Santísimo.
         </p>
       </div>
     `;
@@ -1625,7 +1626,7 @@ function renderRepairsGrid() {
           <div class="card-main-body">
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
             <p class="repair-lead-text">
-              Equipamiento con baterías recargables de alta duración para los micrófonos del Templo y Salón Capilla (6 en total), más las 2 velas eléctricas de la Capilla de Adoración Continua.
+              Meta total: <strong>32 pilas AA recargables (16 packs de 2 pilas)</strong>. Permite rotación permanente (un juego en uso y otro cargando) para los 6 micrófonos inalámbricos y las 2 velas eléctricas de la Capilla de Adoración Continua.
             </p>
           </div>
 
@@ -1652,7 +1653,7 @@ function renderRepairsGrid() {
                 </div>
                 <div class="parallel-stat-amount">${formatCurrency(totalRepairCost)}</div>
                 <div class="parallel-stat-sub">
-                  <span>🎯 Costo total (${totalQty} packs)</span>
+                  <span>🎯 Meta: ${totalQty} packs = 32 pilas AA</span>
                 </div>
               </div>
             </div>
@@ -1778,7 +1779,7 @@ function renderRepairsGrid() {
                 </li>
                 <li>
                   <span>📦</span>
-                  <span><strong>16 packs de 2 pilas Energizer Recargables AA (2000 mAh):</strong> A $6.290 cada pack en Sodimac = <strong>${formatCurrency(totalRepairCost)} total</strong>.</span>
+                  <span><strong>16 packs de 2 pilas = 32 pilas AA en total (Energizer 2000 mAh):</strong> Al venir en formato de 2 pilas por pack, se requieren 16 packs para completar las 32 pilas del sistema de rotación. A $6.290 cada pack = <strong>${formatCurrency(totalRepairCost)} total</strong>.</span>
                 </li>
               </ul>
             </div>
@@ -1788,8 +1789,8 @@ function renderRepairsGrid() {
               <div class="product-sodimac-info">
                 <div class="product-sodimac-icon">🔋</div>
                 <div class="product-sodimac-text">
-                  <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V</span>
-                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack • ${totalQty} packs requeridos (${formatCurrency(totalRepairCost)})</span>
+                  <span class="product-sodimac-title">Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V (Meta: 32 pilas)</span>
+                  <span class="product-sodimac-sku">SKU Sodimac: 110228362 • $6.290 c/pack (2 pilas) • ${totalQty} packs requeridos = 32 pilas AA en total (${formatCurrency(totalRepairCost)})</span>
                 </div>
               </div>
               <a href="https://www.sodimac.cl/sodimac-cl/articulo/110228362/pack-de-2-pilas-recargables-aa-2000-mah-1-2v/110228368" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac">
