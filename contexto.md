@@ -92,7 +92,7 @@ La plataforma clasifica las iniciativas en áreas especializadas:
 1. **⚡ Electricidad e Iluminación:**
    - Automatización de baños y pasillos con sensores PIR 360° y sensores de fotocelda/crepusculares.
    - Reemplazo masivo de tubos fluorescentes o halógenos por paneles y campanas LED de bajo consumo.
-   - Renovación de iluminación en Comedor Parroquial mediante 10 paneles LED redondos sobrepuestos de 20W luz fría.
+   - **Renovación de Iluminación en Comedor Parroquial (Proyecto Futuro en Estudio):** Recambio de luminarias por 10 paneles LED redondos sobrepuestos de 20W luz fría (Sodimac SKU: 114110551 / 114110563) a \.990 c/u, total materiales \.900 con instalación voluntaria. Se exhibe en la vista principal como la próxima iniciativa en cola tras culminar el proyecto activo de pilas.
    - Normalización de tableros eléctricos, puesta a tierra e iluminación de emergencia en salidas de escape.
 2. **🎙️ Audio y Megafonía Litúrgica:**
    - **4 Micrófonos Inalámbricos del Templo Mayor:** Modelo SKP PRO AUDIO UHF 600 PRO en rack de sacristía. Requieren 2 pilas AA c/u más su juego de recarga de relevo continuo (16 pilas AA / 8 packs). **(Prioridad Actual - Fase 1)**.

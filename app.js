@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v15';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v16';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -1119,11 +1119,11 @@ function calculateMetrics() {
 
   // Update tab badge counters
   const activeCount = appData.repairs.filter(r => (r.status || '') !== 'planificacion').length;
-  const backlogCount = appData.repairs.filter(r => (r.status || '') === 'planificacion').length;
+  const backlogCount = appData.repairs.filter(r => (r.status || '') === 'planificacion' && r.id !== 'rep_comedor_iluminacion').length;
   const badgeActive = document.getElementById('badge-active-count');
   const badgeBacklog = document.getElementById('badge-backlog-count');
-  if (badgeActive) badgeActive.textContent = activeCount;
-  if (badgeBacklog) badgeBacklog.textContent = backlogCount;
+  if (badgeActive) badgeActive.textContent = '1 Activo + 1 Futuro';
+  if (badgeBacklog) badgeBacklog.textContent = `${backlogCount} en espera`;
 }
 
 /* ==========================================================================
@@ -1946,7 +1946,6 @@ function renderRepairsGrid() {
               <span>📖 Conoce el Proyecto Paso a Paso ↓</span>
             </button>
           </div>
-        </article>
 
         <!-- Nivel 2 y 3 del Embudo: Contenido Guiado Progresivo -->
         <section class="project-funnel-section" id="project-funnel-section">
@@ -2165,8 +2164,132 @@ function renderRepairsGrid() {
             </div>
           </div>
         </section>
+      </article>
       `;
     });
+
+    // =========================================================================
+    // PROYECTO FUTURO DESTACADO: Iluminación Comedor Parroquial (10 Paneles LED)
+    // =========================================================================
+    const comedorRepair = appData.repairs.find(r => r.id === 'rep_comedor_iluminacion');
+    const searchQuery = (searchInput?.value || '').trim().toLowerCase();
+    const matchesSearch = !searchQuery ||
+      (comedorRepair && (
+        comedorRepair.title.toLowerCase().includes(searchQuery) ||
+        comedorRepair.description.toLowerCase().includes(searchQuery) ||
+        (comedorRepair.place || '').toLowerCase().includes(searchQuery) ||
+        (comedorRepair.area || '').toLowerCase().includes(searchQuery) ||
+        (comedorRepair.specialty || '').toLowerCase().includes(searchQuery) ||
+        (comedorRepair.items || []).some(itm => (itm.name || '').toLowerCase().includes(searchQuery))
+      ));
+    const matchesPlace = currentFilterPlace === 'all' || (comedorRepair && (comedorRepair.place || '').toLowerCase() === currentFilterPlace.toLowerCase());
+    const matchesArea = currentFilterArea === 'all' || (comedorRepair && (comedorRepair.area || '').toLowerCase() === currentFilterArea.toLowerCase());
+
+    if (comedorRepair && matchesSearch && matchesPlace && matchesArea) {
+      const comedorItems = comedorRepair.items || [];
+      let comedorCost = 0;
+      comedorItems.forEach(itm => {
+        comedorCost += (Number(itm.price) || 0) * (Number(itm.qty) || 1);
+      });
+
+      html += `
+        <!-- Banner de Proyecto Futuro / Próxima Iniciativa Parroquial -->
+        <div class="future-project-banner">
+          <div class="future-project-badge">
+            <span class="pulse-beacon" style="background:#eab308; box-shadow:0 0 0 0 rgba(234, 179, 8, 0.7);"></span>
+            <span>PROYECTO FUTURO • EN PLANIFICACIÓN</span>
+          </div>
+          <h3 class="future-project-heading">Próxima Iniciativa Parroquial: Iluminación Comedor</h3>
+          <p class="future-project-sub">
+            Iniciativa técnica programada para ejecutarse una vez completada la meta prioritaria de pilas recargables para micrófonos y adoración continua.
+          </p>
+        </div>
+
+        <article class="featured-future-card" data-id="${comedorRepair.id}">
+          <div class="card-top">
+            <div class="hierarchy-tags">
+              <span class="tag tag-place">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                Casa Sacerdotal y Salones
+              </span>
+              <span class="tag tag-area">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                Comedor Parroquial
+              </span>
+              <span class="tag tag-specialty">
+                ⚡ Electricidad e Iluminación
+              </span>
+              <span class="tag tag-status-planificacion">
+                ⏳ En Planificación
+              </span>
+              <span class="tag tag-priority-alta">
+                ALTA
+              </span>
+            </div>
+          </div>
+
+          <div class="card-main-body">
+            <h3 class="repair-title">${escapeHtml(comedorRepair.title)}</h3>
+            <p class="repair-lead-text">
+              Renovación integral de la iluminación del <strong>Comedor Parroquial</strong>, espacio de uso comunitario para encuentros pastorales, convivencias fraternas y reuniones comunitarias. Se reemplazarán las luminarias actuales por <strong>10 paneles redondos LED de 20W sobrepuestos</strong> en cielo para una luz blanca fría homogénea, confortable y de bajo consumo eléctrico.
+            </p>
+
+            <!-- Ficha Técnica del Panel LED en Sodimac -->
+            <div class="future-item-card">
+              <div class="future-item-icon">💡</div>
+              <div class="future-item-body">
+                <div class="future-item-title-row">
+                  <span class="future-item-name">Panel Redondo LED AD Sobrepuesto 20W Frío</span>
+                  <span class="future-item-qty-badge">10 Unidades</span>
+                </div>
+                <p class="future-item-desc">
+                  Montaje sobrepuesto en cielo. Luz fría de 6500K para iluminación uniforme sin sombras, encendido instantáneo, libre de parpadeos y bajo consumo (20W).
+                </p>
+                <div class="future-item-sku-row">
+                  <span><strong>SKU Sodimac:</strong> 114110551 / 114110563</span>
+                  <span><strong>Precio Unitario:</strong> $3.990 c/u</span>
+                  <span class="future-item-total"><strong>Total:</strong> 10 × $3.990 = $39.900</span>
+                </div>
+              </div>
+              <div class="future-item-action">
+                <a href="https://www.sodimac.cl/sodimac-cl/articulo/114110551/panel-redondo-led-ad-sobrepuesto-20w-frio/114110563" target="_blank" rel="noopener noreferrer" class="btn-open-sodimac" style="white-space:nowrap;">
+                  Verificar en Sodimac.cl ↗
+                </a>
+              </div>
+            </div>
+
+            <!-- Resumen de Costos y Planificación -->
+            <div class="future-meta-grid">
+              <div class="future-meta-box">
+                <span class="future-meta-lbl">Presupuesto Materiales</span>
+                <span class="future-meta-val">${formatCurrency(comedorCost)}</span>
+                <span class="future-meta-sub">10 paneles LED sobrepuestos</span>
+              </div>
+              <div class="future-meta-box">
+                <span class="future-meta-lbl">Mano de Obra</span>
+                <span class="future-meta-val" style="color:#16a34a;">$0 (Voluntariado)</span>
+                <span class="future-meta-sub">Instalación técnica fraterna</span>
+              </div>
+              <div class="future-meta-box">
+                <span class="future-meta-lbl">Estado Campaña</span>
+                <span class="future-meta-val" style="color:#64748b;">$0 (0%)</span>
+                <span class="future-meta-sub">Inicio tras completar Fase Pilas</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones del Proyecto Futuro -->
+          <div class="future-card-actions">
+            <button type="button" class="btn-activate-future" onclick="promoteToActive('${comedorRepair.id}')" title="Activar anticipadamente e iniciar recaudación">
+              🚀 Activar Campaña Ahora
+            </button>
+            <button type="button" class="btn-view-future-sheet" onclick="editRepair('${comedorRepair.id}')" title="Ver ficha técnica completa">
+              📋 Ver Ficha Técnica / Editar
+            </button>
+          </div>
+        </article>
+      `;
+    }
 
     html += `
       <!-- Backlog Invitation Bar -->
