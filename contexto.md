@@ -151,3 +151,11 @@ Para ofrecer una experiencia limpia, visual y accesible:
    - Al pulsar cualquier tarjeta (o su botón 'Ver Detalles'), la plataforma navega fluidamente hacia la vista completa del proyecto.
    - Cuenta con barra superior e inferior `← Volver a Proyectos Parroquiales` y sincronización con el historial del navegador (`hashchange`) para que el botón 'Atrás' del teléfono o navegador regrese a la lista general.
    - En el detalle de Pilas se despliega la galería de 4 micrófonos en rack, el modelo SKP UHF 600 PRO, desglose de las 3 fases (Templo, Capilla, Adoración) y la guía interactiva de 3 pasos con los datos de transferencia a Mercado Pago y el código QR.
+
+3. **Módulo y Botón de Compartir con Datos de Transferencia:**
+   - Cada proyecto incorpora un botón dedicado `Compartir` (en la tarjeta resumida, en la barra superior de detalles y en el backlog).
+   - Abre el modal interactivo de compartición (`#share-modal`) que genera automáticamente el payload completo:
+     - Título y objetivo del proyecto.
+     - Enlace directo interactivo (`#/proyecto/<id>`).
+     - Datos completos para donación vía transferencia bancaria (Banco: MERCADO PAGO, Cuenta Vista: 1011953574, RUT: 14.148.009-k, Correo: rodrigo.quezadab@gmail.com, Asunto: Parroquia).
+   - Permite enviar con un solo clic a **WhatsApp** (`https://wa.me/?text=...`), copiar el texto completo al portapapeles o copiar solo el enlace web.

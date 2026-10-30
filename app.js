@@ -1403,6 +1403,117 @@ window.promoteToActive = function(repairId) {
 };
 
 
+
+/* ==========================================================================
+   Project Sharing & Bank Transfer Payload Generation
+   ========================================================================== */
+function generateShareData(repairId) {
+  const repair = appData.repairs.find(r => r.id === repairId) || appData.repairs[0];
+  const url = `${window.location.origin}${window.location.pathname}#/proyecto/${repair.id}`;
+
+  let goalText = '';
+  if (repair.id === 'rep_pilas_microfonos') {
+    goalText = '🎯 Meta Prioritaria: 16 pilas AA para los 4 micrófonos del Templo Mayor ($29.000 recaudado de $50.320). Meta consolidada: 32 pilas AA para 8 aparatos parroquiales en rotación continua ($100.640).';
+  } else if (repair.id === 'rep_comedor_iluminacion') {
+    goalText = '💡 Meta Materiales: 10 paneles LED AD sobrepuestos 20W luz fría ($3.990 c/u • Presupuesto: $39.900). Instalación voluntaria comunitaria.';
+  } else {
+    const items = repair.items || [];
+    let matCost = 0;
+    items.forEach(itm => matCost += (Number(itm.price) || 0) * (Number(itm.qty) || 1));
+    const total = matCost + (repair.hasLabor ? (Number(repair.laborCost) || 0) : 0);
+    goalText = `📦 Presupuesto estimado: ${formatCurrency(total)}.`;
+  }
+
+  const message = 
+`🍀 *Parroquia San Patricio — Ayuda Técnica Fraterna*
+Proyecto: *${repair.title}*
+Ubicación: ${repair.place || 'Parroquia San Patricio'} • ${repair.area || 'Comunidad'}
+
+${goalText}
+
+🏦 *Datos para Donación y Transferencia Bancaria:*
+• Banco: MERCADO PAGO
+• Tipo: Cuenta Vista
+• N° de Cuenta: 1011953574
+• RUT: 14.148.009-k
+• Correo: rodrigo.quezadab@gmail.com
+• Asunto / Glosa: Parroquia
+
+🔗 *Conoce todos los detalles, fotos y avances del proyecto aquí:*
+${url}`;
+
+  return {
+    repair,
+    url,
+    title: `Parroquia San Patricio: ${repair.title}`,
+    message,
+    whatsappUrl: `https://wa.me/?text=${encodeURIComponent(message)}`
+  };
+}
+
+window.openShareModal = function(repairId) {
+  const shareData = generateShareData(repairId);
+  window.currentShareData = shareData;
+
+  const modal = document.getElementById('share-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('share-modal-project-title');
+  const previewEl = document.getElementById('share-modal-preview-text');
+  const waBtn = document.getElementById('share-modal-btn-wa');
+  const nativeBtn = document.getElementById('share-modal-btn-native');
+
+  if (titleEl) titleEl.textContent = shareData.repair.title;
+  if (previewEl) previewEl.value = shareData.message;
+  if (waBtn) waBtn.href = shareData.whatsappUrl;
+
+  if (nativeBtn) {
+    if (navigator.share) {
+      nativeBtn.style.display = 'inline-flex';
+    } else {
+      nativeBtn.style.display = 'none';
+    }
+  }
+
+  modal.classList.add('is-open');
+};
+
+window.copyShareFullMessage = function() {
+  if (!window.currentShareData) return;
+  navigator.clipboard.writeText(window.currentShareData.message)
+    .then(() => {
+      showToast('¡Mensaje y datos de transferencia copiados al portapapeles!');
+    })
+    .catch(() => {
+      const previewEl = document.getElementById('share-modal-preview-text');
+      if (previewEl) {
+        previewEl.select();
+        document.execCommand('copy');
+        showToast('¡Mensaje y datos de transferencia copiados al portapapeles!');
+      }
+    });
+};
+
+window.copyShareLinkOnly = function() {
+  if (!window.currentShareData) return;
+  navigator.clipboard.writeText(window.currentShareData.url)
+    .then(() => {
+      showToast('¡Enlace directo al proyecto copiado!');
+    })
+    .catch(() => {
+      prompt('Copia el enlace del proyecto:', window.currentShareData.url);
+    });
+};
+
+window.triggerNativeShare = function() {
+  if (!window.currentShareData || !navigator.share) return;
+  navigator.share({
+    title: window.currentShareData.title,
+    text: window.currentShareData.message,
+    url: window.currentShareData.url
+  }).catch(() => {});
+};
+
 window.navigateToProjectDetails = function(repairId) {
   activeDetailsProjectId = repairId;
   window.location.hash = '#/proyecto/' + repairId;
@@ -1505,9 +1616,15 @@ function renderProjectDetailsView(repair, statusLabels) {
         <div class="project-details-header-bar">
           <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            <span>← Volver a Proyectos Parroquiales</span>
+            <span>← Volver a Proyectos</span>
           </button>
-          <div class="details-status-pill">🟢 Campaña Parroquial Activa</div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn-share-details" onclick="openShareModal('${repair.id}')" title="Compartir proyecto y datos de transferencia">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span>Compartir</span>
+            </button>
+            <div class="details-status-pill">🟢 Campaña Activa</div>
+          </div>
         </div>
 
         <article class="featured-active-card in-details-view" data-id="${repair.id}">
@@ -2003,9 +2120,15 @@ function renderProjectDetailsView(repair, statusLabels) {
         <div class="project-details-header-bar">
           <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            <span>← Volver a Proyectos Parroquiales</span>
+            <span>← Volver a Proyectos</span>
           </button>
-          <div class="details-status-pill future">⏳ Proyecto Futuro • En Planificación</div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn-share-details" onclick="openShareModal('${repair.id}')" title="Compartir proyecto y datos de transferencia">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span>Compartir</span>
+            </button>
+            <div class="details-status-pill future">⏳ Proyecto Futuro • En Planificación</div>
+          </div>
         </div>
 
         <article class="featured-future-card in-details-view" data-id="${repair.id}">
@@ -2099,10 +2222,16 @@ function renderProjectDetailsView(repair, statusLabels) {
       <div class="project-details-header-bar">
         <button type="button" class="btn-back-to-projects" onclick="navigateToProjectsList()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          <span>← Volver a Proyectos Parroquiales</span>
+          <span>← Volver a Proyectos</span>
         </button>
-        <div class="details-status-pill ${repair.status === 'planificacion' ? 'future' : ''}">
-          ${statusLabels[repair.status] || 'En Planificación'}
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn-share-details" onclick="openShareModal('${repair.id}')" title="Compartir proyecto y datos de transferencia">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Compartir</span>
+          </button>
+          <div class="details-status-pill ${repair.status === 'planificacion' ? 'future' : ''}">
+            ${statusLabels[repair.status] || 'En Planificación'}
+          </div>
         </div>
       </div>
 
@@ -2480,9 +2609,15 @@ function renderRepairsGrid() {
 
           <div class="summary-card-footer">
             <span class="summary-badge-count">🔋 8 aparatos • 32 pilas (16 packs)</span>
-            <button type="button" class="btn-summary-action" onclick="event.stopPropagation(); navigateToProjectDetails('${pilasRepair.id}')">
-              Ver Detalles & Donar →
-            </button>
+            <div class="summary-card-footer-actions">
+              <button type="button" class="btn-summary-share" onclick="event.stopPropagation(); openShareModal('${pilasRepair.id}')" title="Compartir proyecto y datos de transferencia">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>Compartir</span>
+              </button>
+              <button type="button" class="btn-summary-action" onclick="event.stopPropagation(); navigateToProjectDetails('${pilasRepair.id}')">
+                Ver Detalles →
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -2556,9 +2691,15 @@ function renderRepairsGrid() {
 
           <div class="summary-card-footer">
             <span class="summary-badge-count">💡 10 paneles LED AD 20W</span>
-            <button type="button" class="btn-summary-action future-cta" onclick="event.stopPropagation(); navigateToProjectDetails('${comedorRepair.id}')">
-              Ver Ficha Técnica →
-            </button>
+            <div class="summary-card-footer-actions">
+              <button type="button" class="btn-summary-share" onclick="event.stopPropagation(); openShareModal('${comedorRepair.id}')" title="Compartir proyecto y datos de transferencia">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>Compartir</span>
+              </button>
+              <button type="button" class="btn-summary-action future-cta" onclick="event.stopPropagation(); navigateToProjectDetails('${comedorRepair.id}')">
+                Ver Ficha →
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -2697,6 +2838,10 @@ function renderRepairsGrid() {
         </div>
 
         <div class="card-donation-row" onclick="event.stopPropagation();">
+          <button type="button" class="btn-card-share-sm" onclick="openShareModal('${repair.id}')" title="Compartir proyecto y datos de transferencia">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Compartir</span>
+          </button>
           <button type="button" class="btn-activate-project" onclick="promoteToActive('${repair.id}')" title="Activar esta iniciativa para comenzar su recaudación y compras">
             🚀 Activar
           </button>
