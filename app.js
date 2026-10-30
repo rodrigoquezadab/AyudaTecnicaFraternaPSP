@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v11';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v12';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -258,6 +258,20 @@ const INITIAL_CATALOG = [
     ]
   },
   {
+    id: 'cat_panel_led_20w_redondo',
+    name: 'Panel Redondo LED AD Sobrepuesto 20W Frío',
+    category: 'Iluminación LED',
+    supplier: 'Homecenter Sodimac',
+    price: 3990,
+    badge: '💡 Alta Eficiencia',
+    url: 'https://www.sodimac.cl/sodimac-cl/articulo/114110551/panel-redondo-led-ad-sobrepuesto-20w-frio/114110563',
+    specs: '20W LED, 6500K luz fría, diseño redondo sobrepuesto para cielo/techo, encendido instantáneo, 220V.',
+    notes: 'Ideal para renovación y mejora de iluminación en el comedor parroquial, salones comunitarios y salas de encuentro.',
+    links: [
+      { store: 'Homecenter Sodimac', sku: '114110551', price: 3990, url: 'https://www.sodimac.cl/sodimac-cl/articulo/114110551/panel-redondo-led-ad-sobrepuesto-20w-frio/114110563', isSelected: true }
+    ]
+  },
+  {
     id: 'cat_foco_led_18w_ip65',
     name: 'Luminaria LED Hermética Exterior 18W IP65 Luz Fría',
     category: 'Iluminación LED',
@@ -450,6 +464,30 @@ const SAMPLE_DATA = [
   },
 
   // ── PROYECTOS FUTUROS (EN PLANIFICACIÓN) ────────────────────────────────────
+  {
+    id: 'rep_comedor_iluminacion',
+    place: 'Casa Sacerdotal y Salones',
+    area: 'Comedor Parroquial',
+    specialty: 'Electricidad e Iluminación',
+    status: 'planificacion',
+    title: 'Renovación de Iluminación en Comedor Parroquial (10 Paneles LED 20W Sobrepuestos)',
+    description: '[30/10/2026 02:30] ⏱️ Diagnóstico y Planificación: Renovación integral de la iluminación del Comedor Parroquial, espacio de uso comunitario para encuentros pastorales y convivencias fraternas.\n\n[30/10/2026 02:30] 💡 Elección Técnica: 10 Paneles Redondos LED AD Sobrepuestos de 20W Luz Fría (Sodimac SKU: 114110551 / 114110563) a $3.990 c/u. Distribución lumínica homogénea, encendido inmediato, bajo consumo y montaje sobrepuesto limpio en cielo.\n\n[30/10/2026 02:30] 📦 Presupuesto: 10 paneles × $3.990 = $39.900 total materiales.',
+    priority: 'alta',
+    raisedAmount: 0,
+    hasLabor: false,
+    laborCost: 0,
+    createdAt: Date.now() + 8500,
+    items: [
+      {
+        id: 'itm_comedor_1',
+        name: 'Panel Redondo LED AD Sobrepuesto 20W Frío [SKU: 114110551 / 114110563] — Sodimac',
+        price: 3990,
+        qty: 10,
+        url: 'https://www.sodimac.cl/sodimac-cl/articulo/114110551/panel-redondo-led-ad-sobrepuesto-20w-frio/114110563',
+        bought: false
+      }
+    ]
+  },
   {
     id: 'rep_parroquia_entrada_banos',
     place: 'Exteriores y Pasillos',
@@ -973,6 +1011,14 @@ function loadData() {
         // Ensure catalog is loaded
         if (!Array.isArray(appData.catalog) || appData.catalog.length === 0) {
           appData.catalog = JSON.parse(JSON.stringify(INITIAL_CATALOG));
+        }
+
+        // Guarantee that the new comedor project exists in repairs
+        if (!appData.repairs.some(r => r.id === 'rep_comedor_iluminacion')) {
+          const comedorProj = SAMPLE_DATA.find(r => r.id === 'rep_comedor_iluminacion');
+          if (comedorProj) {
+            appData.repairs.splice(1, 0, JSON.parse(JSON.stringify(comedorProj)));
+          }
         }
 
         // Guarantee by default that only the active battery project is shown as active, others in backlog

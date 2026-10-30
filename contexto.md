@@ -92,6 +92,7 @@ La plataforma clasifica las iniciativas en áreas especializadas:
 1. **⚡ Electricidad e Iluminación:**
    - Automatización de baños y pasillos con sensores PIR 360° y sensores de fotocelda/crepusculares.
    - Reemplazo masivo de tubos fluorescentes o halógenos por paneles y campanas LED de bajo consumo.
+   - Renovación de iluminación en Comedor Parroquial mediante 10 paneles LED redondos sobrepuestos de 20W luz fría.
    - Normalización de tableros eléctricos, puesta a tierra e iluminación de emergencia en salidas de escape.
 2. **🎙️ Audio y Megafonía Litúrgica:**
    - Mantención y recambio de cápsulas de micrófonos para el altar, ambón y coro.
