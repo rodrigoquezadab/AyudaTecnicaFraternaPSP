@@ -3,7 +3,7 @@
  * Logic & State Management
  */
 
-const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v13';
+const STORAGE_KEY = 'parroquia_san_patricio_proyectos_v14';
 
 // Initial sample catalog with real quotations, multiple store links by SKU (Sodimac, Easy, Direct) & sensor comparisons
 const INITIAL_CATALOG = [
@@ -445,7 +445,7 @@ const SAMPLE_DATA = [
     specialty: 'Audio y Velas Litúrgicas',
     status: 'compras',
     title: 'Compra de 32 Pilas Recargables AA Energizer (16 Packs) para Micrófonos y Velas de Adoración',
-    description: '[30/10/2026 02:45] 🎯 Proyecto Estructurado en 3 Fases con Prioridad Inmediata en Fase 1:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas operando + 8 en relevo/recarga = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de cumplimiento).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos del Salón Capilla (4 en uso + 4 en relevo). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas eléctricas de Adoración Continua al Santísimo (4 en uso + 4 en relevo). Meta: $25.160.\n• META GLOBAL CONSOLIDADA: 32 pilas AA (16 packs) = $100.640.',
+    description: '[30/10/2026 02:50] 🔋 Regla del Proyecto Pilas Recargables:\nEn el proyecto son 4 micrófonos para el Templo, 2 para la Capilla y 2 velas para la Adoración al Santísimo Sacramento. Cada aparato (micrófonos y velas del Santísimo) utiliza 2 pilas cada uno, y debemos tener el doble de pilas para tener siempre unas en uso y otras en carga.\n\n🎯 Desglose por Fases e Hitos:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas en uso + 8 en carga continua = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de avance).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos de la Capilla (4 en uso + 4 en carga). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas de Adoración al Santísimo Sacramento (4 en uso + 4 en carga). Meta: $25.160.\n• META TOTAL CONSOLIDADA: 32 pilas AA (16 packs de 2 pilas) = $100.640.',
     priority: 'alta',
     raisedAmount: 29000,
     hasLabor: false,
@@ -1033,7 +1033,7 @@ function loadData() {
             r.place = 'Templo Mayor y Capilla de Adoración';
             r.area = 'Sonido Litúrgico y Adoración Continua';
             r.specialty = 'Audio y Velas Litúrgicas';
-            r.description = '[30/10/2026 02:45] 🎯 Proyecto Estructurado en 3 Fases con Prioridad Inmediata en Fase 1:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas operando + 8 en relevo/recarga = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de cumplimiento).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos del Salón Capilla (4 en uso + 4 en relevo). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas eléctricas de Adoración Continua al Santísimo (4 en uso + 4 en relevo). Meta: $25.160.\n• META GLOBAL CONSOLIDADA: 32 pilas AA (16 packs) = $100.640.';
+            r.description = '[30/10/2026 02:50] 🔋 Regla del Proyecto Pilas Recargables:\nEn el proyecto son 4 micrófonos para el Templo, 2 para la Capilla y 2 velas para la Adoración al Santísimo Sacramento. Cada aparato (micrófonos y velas del Santísimo) utiliza 2 pilas cada uno, y debemos tener el doble de pilas para tener siempre unas en uso y otras en carga.\n\n🎯 Desglose por Fases e Hitos:\n• FASE 1 (PRIORIDAD ACTUAL Y META A CUMPLIR): 16 pilas recargables AA (8 packs) para los 4 micrófonos del Templo Mayor. 4 micrófonos × 2 pilas = 8 pilas en uso + 8 en carga continua = 16 pilas AA en total. Meta: $50.320. Recaudado actual: $29.000 (58% de avance).\n• FASE 2 (PRÓXIMO HITO): 8 pilas recargables AA (4 packs) para los 2 micrófonos de la Capilla (4 en uso + 4 en carga). Meta: $25.160.\n• FASE 3 (HITO FINAL): 8 pilas recargables AA (4 packs) para las 2 velas de Adoración al Santísimo Sacramento (4 en uso + 4 en carga). Meta: $25.160.\n• META TOTAL CONSOLIDADA: 32 pilas AA (16 packs de 2 pilas) = $100.640.';
             if (r.items && r.items[0]) {
               r.items[0].name = 'Pack de 2 Pilas Recargables AA Energizer 2000 mAh 1.2V [SKU: 110228362] — Sodimac (16 packs = 32 pilas AA)';
               r.items[0].qty = 16;
@@ -1672,7 +1672,7 @@ function renderRepairsGrid() {
           <div class="card-main-body">
             <h3 class="repair-title">${escapeHtml(repair.title)}</h3>
             <p class="repair-lead-text">
-              Proyecto organizado en <strong>3 Fases</strong>. La <strong>prioridad actual y meta a cumplir</strong> son las <strong>16 pilas AA (8 packs)</strong> para los 4 micrófonos del Templo Mayor (2 pilas en cada micrófono más su doble de reemplazo en recarga continua).
+              En el proyecto son <strong>4 micrófonos para el Templo, 2 para la Capilla y 2 velas para la Adoración al Santísimo Sacramento</strong>. Cada aparato utiliza <strong>2 pilas cada uno</strong> y debemos tener <strong>el doble de pilas para tener siempre unas en uso y otras en carga</strong> (32 pilas en total). La <strong>prioridad actual y meta a cumplir</strong> son las <strong>16 pilas para los 4 micrófonos del Templo</strong>.
             </p>
           </div>
 
@@ -1749,7 +1749,25 @@ function renderRepairsGrid() {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     <span>Cumplimiento y Metas por Hitos (3 Fases)</span>
                   </h4>
-                  <span class="phase-milestones-badge">32 Pilas AA en Rotación Continua</span>
+                  <span class="phase-milestones-badge">Regla: El Doble para Uso y Carga</span>
+                </div>
+
+                <!-- Banner Resumen de la Regla del Proyecto -->
+                <div class="phase-formula-banner">
+                  <div class="formula-col">
+                    <span class="formula-label">8 Aparatos Parroquiales</span>
+                    <span class="formula-text">4 mic. Templo + 2 mic. Capilla + 2 velas Santísimo</span>
+                  </div>
+                  <div class="formula-op">× 2 pilas =</div>
+                  <div class="formula-col">
+                    <span class="formula-label">En Uso Simultáneo</span>
+                    <span class="formula-text">16 pilas AA activas</span>
+                  </div>
+                  <div class="formula-op">× 2 (Doble) =</div>
+                  <div class="formula-col highlight">
+                    <span class="formula-label">Meta Total</span>
+                    <span class="formula-text">32 pilas (16 en uso + 16 en carga)</span>
+                  </div>
                 </div>
 
                 <div class="phase-milestones-grid">
